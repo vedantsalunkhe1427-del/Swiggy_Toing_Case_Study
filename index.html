@@ -1,1931 +1,1051 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Toing by Swiggy: Can Cheap Food Delivery Pay? | Strategic Case Study</title>
-  
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%23FC8019'/><path d='M35 30 L65 30 L65 45 L45 45 L45 55 L60 55 L60 70 L35 70 Z' fill='white'/></svg>">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Toing by Swiggy · Product Teardown &amp; Economic Case Study</title>
+<meta name="description" content="Can Swiggy make cheap food delivery pay? A comprehensive product teardown, competitive analysis, and unit economics model for Toing, Swiggy's standalone budget delivery app." />
 
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            swiggy: {
-              orange: '#FC8019',
-              'orange-dark': '#E66700',
-              'orange-light': '#FFF2E8',
-              black: '#02060C',
-              charcoal: '#1E1E24',
-              gray: '#686B78',
-              card: '#FFFFFF',
-              green: '#60B244',
-              red: '#E23744',
-              yellow: '#FFB300'
-            }
-          },
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-            brand: ['Outfit', 'sans-serif'],
-            mono: ['"JetBrains Mono"', 'monospace']
-          },
-          animation: {
-            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-            'fadeIn': 'fadeIn 0.3s ease-in-out'
-          },
-          keyframes: {
-            fadeIn: {
-              '0%': { opacity: '0', transform: 'translateY(6px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' }
-            }
-          }
-        }
-      }
-    }
-  </script>
+<!-- Core Stack CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- Confetti CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-
-  <!-- Custom Stylesheet -->
-  <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-[#F8F9FA] dark:bg-[#0A0D14] text-[#1C1D24] dark:text-[#F1F3F7] min-h-screen antialiased selection:bg-[#FC8019] selection:text-white">
+<body>
 
-  <!-- =========================================================================
-       1. Top Fixed Navigation Bar & Progress Scooter Track
-       ========================================================================= -->
-  <header class="fixed top-0 left-0 right-0 z-50 glass-header border-b border-gray-200/80 dark:border-gray-800/80 transition-colors">
-    <!-- Scrolling Progress Bar with Delivery Scooter -->
-    <div class="relative w-full h-1.5 bg-gray-200 dark:bg-gray-800 overflow-visible">
-      <div id="progress-bar" class="h-full bg-gradient-to-r from-orange-400 via-[#FC8019] to-orange-600 w-0 transition-all duration-75"></div>
-      <div id="scooter-indicator" class="absolute -top-3 left-0 text-orange-500 dark:text-orange-400 filter drop-shadow-sm pointer-events-none transform transition-transform">
-        <svg class="w-6 h-6 animate-bounce" viewBox="0 0 24 24" fill="currentColor">
-          <circle cx="6" cy="18" r="3" fill="#FC8019"/>
-          <circle cx="18" cy="18" r="3" fill="#FC8019"/>
-          <path d="M6 15h4l3-7h4" stroke="#FC8019" stroke-width="2" fill="none" stroke-linecap="round"/>
-          <path d="M14 8h5l2 4h-2" stroke="#FC8019" stroke-width="2" fill="none" stroke-linecap="round"/>
-        </svg>
-      </div>
-    </div>
+<div id="progress"></div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <!-- Left: Logo & Case Tag -->
-      <div class="flex items-center gap-3">
-        <a href="#hero" class="flex items-center gap-2.5 group">
-          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#FC8019] to-[#FF5200] flex items-center justify-center text-white shadow-md shadow-orange-500/30 group-hover:scale-105 transition-transform">
-            <i data-lucide="utensils" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <div class="flex items-center gap-1.5">
-              <span class="font-extrabold text-xl tracking-tight text-gray-950 dark:text-white font-brand">toing</span>
-              <span class="text-xs font-semibold px-1.5 py-0.5 rounded bg-orange-100 dark:bg-orange-950/70 text-orange-700 dark:text-orange-300">by Swiggy</span>
-            </div>
-            <div class="text-[10px] uppercase font-bold tracking-wider text-gray-500 dark:text-gray-400">Strategic Case Study</div>
-          </div>
-        </a>
-      </div>
+<!-- Side Navigation Dots -->
+<nav id="sidenav">
+  <a href="#hero"><i></i><span>The Hook</span></a>
+  <a href="#problem"><i></i><span>The Fee Fatigue</span></a>
+  <a href="#market"><i></i><span>Competitive Teardown</span></a>
+  <a href="#diagnosis"><i></i><span>Funnel Diagnosis</span></a>
+  <a href="#journey"><i></i><span>The Solution</span></a>
+  <a href="#priority"><i></i><span>Prioritization (RICE)</span></a>
+  <a href="#business"><i></i><span>The Business Case</span></a>
+  <a href="#metrics"><i></i><span>KPIs &amp; Funnel</span></a>
+  <a href="#roadmap"><i></i><span>Phased Roadmap</span></a>
+  <a href="#close"><i></i><span>The Prize &amp; Moat</span></a>
+</nav>
 
-      <!-- Center: Section Quick Links (Desktop) -->
-      <nav class="hidden lg:flex items-center gap-1 text-xs font-semibold text-gray-600 dark:text-gray-300">
-        <a href="#summary" class="nav-link px-3 py-1.5 rounded-full hover:text-orange-500 transition-colors">Summary</a>
-        <a href="#bill-comparison" class="nav-link px-3 py-1.5 rounded-full hover:text-orange-500 transition-colors">The Bill</a>
-        <a href="#the-company" class="nav-link px-3 py-1.5 rounded-full hover:text-orange-500 transition-colors">Company</a>
-        <a href="#the-problem" class="nav-link px-3 py-1.5 rounded-full hover:text-orange-500 transition-colors">The Problem</a>
-        <a href="#what-is-toing" class="nav-link px-3 py-1.5 rounded-full hover:text-orange-500 transition-colors">What Toing Is</a>
-        <a href="#the-numbers" class="nav-link px-3 py-1.5 rounded-full hover:text-orange-500 transition-colors">The Numbers</a>
-        <a href="#rivals" class="nav-link px-3 py-1.5 rounded-full hover:text-orange-500 transition-colors">Rivals</a>
-        <a href="#analysis" class="nav-link px-3 py-1.5 rounded-full hover:text-orange-500 transition-colors">Unit Economics</a>
-        <a href="#recommendations" class="nav-link px-3 py-1.5 rounded-full hover:text-orange-500 transition-colors">Strategy</a>
-        <a href="#discussion" class="nav-link px-3 py-1.5 rounded-full hover:text-orange-500 transition-colors">Polls</a>
-      </nav>
+<div class="panels">
 
-      <!-- Right: Utility Actions (Search, Sound, Theme, Print) -->
-      <div class="flex items-center gap-2 sm:gap-3">
-        <!-- Quick Search Button -->
-        <button id="search-btn" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/60 hover:border-orange-300 dark:hover:border-gray-700 text-xs font-medium text-gray-600 dark:text-gray-300 transition-all" title="Search case topics (Ctrl+K)">
-          <i data-lucide="search" class="w-3.5 h-3.5 text-gray-400"></i>
-          <span class="hidden sm:inline">Search</span>
-          <kbd class="hidden md:inline-block px-1.5 py-0.5 text-[10px] font-mono bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 text-gray-400">Ctrl K</kbd>
-        </button>
-
-        <!-- Sound FX Toggle -->
-        <button id="sound-toggle" class="p-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/60 text-orange-500 hover:text-orange-600 transition-colors" title="Toggle UI sound effects">
-          <i id="sound-icon" data-lucide="volume-2" class="w-4 h-4"></i>
-        </button>
-
-        <!-- Theme Toggle -->
-        <button id="theme-toggle" class="p-2 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/60 text-gray-700 dark:text-gray-200 hover:text-orange-500 transition-colors" title="Toggle Light/Dark Theme">
-          <i id="theme-icon" data-lucide="moon" class="w-4 h-4"></i>
-        </button>
-
-        <!-- Print / PDF Button -->
-        <button id="print-btn" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 text-xs font-semibold hover:bg-orange-100 transition-colors">
-          <i data-lucide="printer" class="w-3.5 h-3.5"></i>
-          <span>Print</span>
-        </button>
-
-        <!-- Mobile Drawer Toggle -->
-        <button id="mobile-menu-btn" class="lg:hidden p-2 rounded-xl text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
-          <i data-lucide="menu" class="w-5 h-5"></i>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- Mobile Drawer Overlay -->
-  <div id="mobile-drawer" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex flex-col justify-end sm:justify-start">
-    <div class="bg-white dark:bg-gray-900 w-full sm:max-w-sm sm:h-full p-6 space-y-6 shadow-2xl rounded-t-3xl sm:rounded-none overflow-y-auto">
-      <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-xl bg-orange-500 text-white flex items-center justify-center font-bold">T</div>
-          <span class="font-extrabold font-brand text-lg">Toing Case Study</span>
-        </div>
-        <button id="close-drawer-btn" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-      <div class="flex flex-col space-y-2 text-sm font-semibold">
-        <a href="#summary" class="drawer-link p-2.5 rounded-xl hover:bg-orange-50 dark:hover:bg-gray-800 flex items-center gap-2"><i data-lucide="file-text" class="w-4 h-4 text-orange-500"></i> Executive Summary</a>
-        <a href="#bill-comparison" class="drawer-link p-2.5 rounded-xl hover:bg-orange-50 dark:hover:bg-gray-800 flex items-center gap-2"><i data-lucide="receipt" class="w-4 h-4 text-orange-500"></i> The Real Bill Contrast</a>
-        <a href="#the-company" class="drawer-link p-2.5 rounded-xl hover:bg-orange-50 dark:hover:bg-gray-800 flex items-center gap-2"><i data-lucide="building" class="w-4 h-4 text-orange-500"></i> The Company (Swiggy)</a>
-        <a href="#the-market" class="drawer-link p-2.5 rounded-xl hover:bg-orange-50 dark:hover:bg-gray-800 flex items-center gap-2"><i data-lucide="trending-up" class="w-4 h-4 text-orange-500"></i> The Market Stagnation</a>
-        <a href="#the-problem" class="drawer-link p-2.5 rounded-xl hover:bg-orange-50 dark:hover:bg-gray-800 flex items-center gap-2"><i data-lucide="help-circle" class="w-4 h-4 text-orange-500"></i> The Strategic Dilemma</a>
-        <a href="#what-is-toing" class="drawer-link p-2.5 rounded-xl hover:bg-orange-50 dark:hover:bg-gray-800 flex items-center gap-2"><i data-lucide="zap" class="w-4 h-4 text-orange-500"></i> What Toing Is</a>
-        <a href="#the-numbers" class="drawer-link p-2.5 rounded-xl hover:bg-orange-50 dark:hover:bg-gray-800 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4 text-orange-500"></i> Financial Numbers</a>
-        <a href="#rivals" class="drawer-link p-2.5 rounded-xl hover:bg-orange-50 dark:hover:bg-gray-800 flex items-center gap-2"><i data-lucide="users" class="w-4 h-4 text-orange-500"></i> Competitors & Rapido</a>
-        <a href="#analysis" class="drawer-link p-2.5 rounded-xl hover:bg-orange-50 dark:hover:bg-gray-800 flex items-center gap-2"><i data-lucide="calculator" class="w-4 h-4 text-orange-500"></i> Unit Economics Math</a>
-        <a href="#recommendations" class="drawer-link p-2.5 rounded-xl hover:bg-orange-50 dark:hover:bg-gray-800 flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-orange-500"></i> Strategic Recommendations</a>
-        <a href="#discussion" class="drawer-link p-2.5 rounded-xl hover:bg-orange-50 dark:hover:bg-gray-800 flex items-center gap-2"><i data-lucide="message-square" class="w-4 h-4 text-orange-500"></i> Community Polls</a>
-        <a href="#sources" class="drawer-link p-2.5 rounded-xl hover:bg-orange-50 dark:hover:bg-gray-800 flex items-center gap-2"><i data-lucide="bookmark" class="w-4 h-4 text-orange-500"></i> 17 Primary Sources</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- =========================================================================
-       2. Hero Header Section
-       ========================================================================= -->
-  <section id="hero" class="pt-28 pb-16 md:pt-36 md:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative overflow-hidden">
-    <!-- Background Swiggy Orange Ambient Light -->
-    <div class="absolute -top-24 right-0 w-96 h-96 bg-orange-400/10 dark:bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute top-1/2 -left-20 w-80 h-80 bg-orange-600/10 dark:bg-orange-600/5 rounded-full blur-3xl pointer-events-none"></div>
-
-    <div class="relative z-10">
-      <!-- Breadcrumb Tag -->
-      <div class="flex flex-wrap items-center gap-2 mb-6">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#FC8019] text-white shadow-sm">
-          <i data-lucide="shield" class="w-3.5 h-3.5"></i>
-          CASE STUDY
-        </span>
-        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
-          <i data-lucide="calendar" class="w-3 h-3 text-orange-500"></i>
-          Published 4 October 2026
-        </span>
-        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
-          <i data-lucide="clock" class="w-3 h-3 text-orange-500"></i>
-          9 Min In-Depth Read
-        </span>
-        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400">
-          <i data-lucide="check-circle-2" class="w-3 h-3"></i>
-          Updated to Q1 FY27 Disclosures
+<!-- =========================================================
+     1. HERO SECTION (Orange Panel, 3D Canvas)
+     ========================================================= -->
+<section class="panel orange no-clip" id="hero">
+  <div class="slab">
+    <canvas id="hero-3d"></canvas>
+    <div class="hero-inner">
+      <div class="reveal">
+        <span class="hero-tag">
+          <span class="dot"></span>
+          Competitive Teardown · Strategic Case Study · Up to Q1 FY27
         </span>
       </div>
-
-      <!-- Main Headline -->
-      <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-gray-950 dark:text-white font-brand leading-[1.1] mb-6">
-        Toing: Can Swiggy Make <br class="hidden sm:inline">
-        <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#FC8019] via-orange-500 to-[#E66700]">Cheap Food Delivery Pay?</span>
+      
+      <h1 class="reveal">
+        Toing by Swiggy:<br>
+        Can Cheap Food Delivery <span class="out">Pay?</span>
       </h1>
-
-      <!-- Subtitle -->
-      <p class="text-lg sm:text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-4xl font-normal leading-relaxed mb-10">
-        A case study on Swiggy's budget food delivery app, the market stagnation that forced it into being, and the brutal unit economics that will decide whether it lasts.
-      </p>
-
-      <!-- Key High-Impact Metrics Grid -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 pt-2 pb-6">
-        <!-- Metric 1 -->
-        <div class="p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 shadow-sm hover:border-orange-400 transition-all group">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-bold uppercase tracking-wider text-gray-400">Footprint in 1 Year</span>
-            <div class="w-7 h-7 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-orange-600 flex items-center justify-center">
-              <i data-lucide="map-pin" class="w-4 h-4"></i>
-            </div>
-          </div>
-          <div class="text-3xl font-extrabold text-gray-900 dark:text-white font-brand">50 Cities</div>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Expanded from Pune soft launch</p>
-        </div>
-
-        <!-- Metric 2 -->
-        <div class="p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 shadow-sm hover:border-orange-400 transition-all group">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-bold uppercase tracking-wider text-gray-400">Market Expansion</span>
-            <div class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center">
-              <i data-lucide="user-plus" class="w-4 h-4"></i>
-            </div>
-          </div>
-          <div class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 font-brand">66% (2/3)</div>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">First-time online food delivery users</p>
-        </div>
-
-        <!-- Metric 3 -->
-        <div class="p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 shadow-sm hover:border-orange-400 transition-all group">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-bold uppercase tracking-wider text-gray-400">Swiggy Q1 FY27 Rev</span>
-            <div class="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-950/60 text-blue-600 flex items-center justify-center">
-              <i data-lucide="trending-up" class="w-4 h-4"></i>
-            </div>
-          </div>
-          <div class="text-3xl font-extrabold text-gray-900 dark:text-white font-brand">₹6,812 Cr</div>
-          <p class="text-xs text-emerald-600 font-semibold mt-1">+37.3% YoY operational growth</p>
-        </div>
-
-        <!-- Metric 4 -->
-        <div class="p-5 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 shadow-sm hover:border-orange-400 transition-all group">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-bold uppercase tracking-wider text-gray-400">Order Contrast Gap</span>
-            <div class="w-7 h-7 rounded-lg bg-orange-100 dark:bg-orange-950/60 text-orange-600 flex items-center justify-center">
-              <i data-lucide="tag" class="w-4 h-4"></i>
-            </div>
-          </div>
-          <div class="text-3xl font-extrabold text-orange-600 font-brand">₹124 vs ₹193</div>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Pune test for identical ₹99 meal</p>
-        </div>
-      </div>
-
-      <!-- Action Row -->
-      <div class="flex flex-wrap items-center gap-4 pt-2">
-        <a href="#bill-comparison" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-[#FC8019] hover:bg-[#E66700] text-white font-bold text-sm shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all transform hover:-translate-y-0.5">
-          <i data-lucide="receipt" class="w-4 h-4"></i>
-          <span>Examine the Bill Contrast & Simulator</span>
-        </a>
-        <a href="#analysis" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-700 font-semibold text-sm transition-all">
-          <i data-lucide="calculator" class="w-4 h-4 text-orange-500"></i>
-          <span>Deep-Dive Unit Economics Math</span>
-        </a>
-        <button id="share-btn" class="inline-flex items-center gap-2 px-4 py-3.5 rounded-2xl text-gray-600 dark:text-gray-300 hover:text-orange-500 text-sm font-semibold transition-colors">
-          <i data-lucide="share-2" class="w-4 h-4"></i>
-          <span>Share Study</span>
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- =========================================================================
-       3. Section 1: The Hook — The Pune Real-World Bill Contrast & Simulator
-       ========================================================================= -->
-  <section id="bill-comparison" class="py-16 bg-white dark:bg-gray-900/60 border-y border-gray-200 dark:border-gray-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- Section Header -->
-      <div class="max-w-3xl mb-12">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-orange-100 dark:bg-orange-950/70 text-orange-700 dark:text-orange-300 mb-3">
-          <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
-          The Opening Contrast
-        </div>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-950 dark:text-white font-brand tracking-tight mb-4">
-          Toing's Pitch in One Comparison: The Food Costs the Same, the Extras Do Not
-        </h2>
-        <p class="text-base text-gray-600 dark:text-gray-300 leading-relaxed">
-          Tested on an identical meal order in Pune shortly after launch in September 2025 and reported by <em>Franchise India</em>. It reveals the exact thesis of Toing: stripping away the compounding layers of platform markups that alienate price-sensitive diners.
-        </p>
-      </div>
-
-      <!-- Real Receipts Side-by-Side Grid (3 Columns) -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        
-        <!-- Receipt 1: TOING -->
-        <div class="receipt-card p-6 sm:p-7 rounded-3xl relative overflow-hidden transition-all duration-300">
-          <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-bl-full pointer-events-none"></div>
-          <div class="flex items-center justify-between pb-4 border-b border-dashed border-gray-300 dark:border-gray-700">
-            <div>
-              <span class="text-xs uppercase font-extrabold tracking-widest text-emerald-600 dark:text-emerald-400">Budget App Model</span>
-              <h3 class="text-2xl font-extrabold font-brand text-gray-900 dark:text-white mt-0.5">Toing</h3>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Same restaurant • Meal under ₹99</p>
-            </div>
-            <div class="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 text-[11px] font-bold flex items-center gap-1">
-              <i data-lucide="sparkles" class="w-3 h-3"></i>
-              35.7% Cheaper
-            </div>
-          </div>
-
-          <!-- Line items -->
-          <div class="py-5 space-y-2.5 font-mono text-xs sm:text-sm border-b border-dashed border-gray-300 dark:border-gray-700">
-            <div class="flex justify-between items-center text-gray-700 dark:text-gray-300">
-              <span>Base Meal Price</span>
-              <span class="font-semibold text-gray-900 dark:text-white" id="toing-bill-meal">₹99.00</span>
-            </div>
-            <div class="flex justify-between items-center text-gray-700 dark:text-gray-300">
-              <span class="flex items-center gap-1">Platform fee</span>
-              <span class="font-semibold text-gray-900 dark:text-white" id="toing-bill-platform">₹12.00</span>
-            </div>
-            <div class="flex justify-between items-center text-gray-700 dark:text-gray-300">
-              <span>Restaurant packaging</span>
-              <span class="font-bold text-emerald-600 dark:text-emerald-400" id="toing-bill-packaging">FREE (₹0)</span>
-            </div>
-            <div class="flex justify-between items-center text-gray-700 dark:text-gray-300">
-              <span>Delivery charge</span>
-              <span class="font-bold text-emerald-600 dark:text-emerald-400" id="toing-bill-delivery">FREE</span>
-            </div>
-            <div class="flex justify-between items-center text-gray-700 dark:text-gray-300">
-              <span>Surge / Rain fee</span>
-              <span class="font-semibold text-emerald-600">None</span>
-            </div>
-          </div>
-
-          <!-- Total -->
-          <div class="pt-5 flex items-end justify-between">
-            <div>
-              <span class="text-[11px] uppercase font-bold tracking-wider text-gray-500">You Pay</span>
-              <div class="text-3xl font-black font-brand text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-baseline gap-1">
-                <span id="toing-bill-total">₹124</span>
-              </div>
-            </div>
-            <div class="text-right">
-              <span class="text-[10px] text-gray-400 block">Junk fees cut</span>
-              <span class="text-[11px] font-semibold text-emerald-600">Pure menu price</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Receipt 2: SWIGGY MAIN APP -->
-        <div class="receipt-card p-6 sm:p-7 rounded-3xl relative overflow-hidden transition-all duration-300">
-          <div class="absolute top-0 right-0 w-24 h-24 bg-red-500/10 rounded-bl-full pointer-events-none"></div>
-          <div class="flex items-center justify-between pb-4 border-b border-dashed border-gray-300 dark:border-gray-700">
-            <div>
-              <span class="text-xs uppercase font-extrabold tracking-widest text-red-600 dark:text-red-400">Standard Platform Model</span>
-              <h3 class="text-2xl font-extrabold font-brand text-gray-900 dark:text-white mt-0.5">Swiggy Core</h3>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Same restaurant • Meal under ₹99</p>
-            </div>
-            <div class="px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400 text-[11px] font-bold flex items-center gap-1">
-              <i data-lucide="trending-up" class="w-3 h-3"></i>
-              +55.6% Extras
-            </div>
-          </div>
-
-          <!-- Line items -->
-          <div class="py-5 space-y-2.5 font-mono text-xs sm:text-sm border-b border-dashed border-gray-300 dark:border-gray-700">
-            <div class="flex justify-between items-center text-gray-700 dark:text-gray-300">
-              <span>Base Meal Price</span>
-              <span class="font-semibold text-gray-900 dark:text-white" id="swiggy-bill-meal">₹99.00</span>
-            </div>
-            <div class="flex justify-between items-center text-gray-700 dark:text-gray-300">
-              <span>Platform fee</span>
-              <span class="font-semibold text-gray-900 dark:text-white" id="swiggy-bill-platform">₹14.99</span>
-            </div>
-            <div class="flex justify-between items-center text-gray-700 dark:text-gray-300">
-              <span>Packaging fee</span>
-              <span class="font-semibold text-gray-900 dark:text-white" id="swiggy-bill-packaging">₹19.00</span>
-            </div>
-            <div class="flex justify-between items-center text-gray-700 dark:text-gray-300">
-              <span>Delivery partner fee</span>
-              <span class="font-semibold text-gray-900 dark:text-white" id="swiggy-bill-delivery">₹35.00</span>
-            </div>
-            <div class="flex justify-between items-center text-gray-700 dark:text-gray-300">
-              <span class="text-red-500 flex items-center gap-1"><i data-lucide="cloud-rain" class="w-3 h-3"></i> Surge / Rain fee</span>
-              <span class="font-semibold text-red-500" id="swiggy-bill-surge">₹25.00</span>
-            </div>
-          </div>
-
-          <!-- Total -->
-          <div class="pt-5 flex items-end justify-between">
-            <div>
-              <span class="text-[11px] uppercase font-bold tracking-wider text-gray-500">You Pay</span>
-              <div class="text-3xl font-black font-brand text-red-600 dark:text-red-400 mt-0.5 flex items-baseline gap-1">
-                <span id="swiggy-bill-total">₹193</span>
-              </div>
-            </div>
-            <div class="text-right">
-              <span class="text-[10px] text-gray-400 block">Extras exceed food</span>
-              <span class="text-[11px] font-bold text-red-500">₹94 in surcharges</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Receipt 3: RAPIDO OWNLY -->
-        <div class="receipt-card p-6 sm:p-7 rounded-3xl relative overflow-hidden transition-all duration-300">
-          <div class="absolute top-0 right-0 w-24 h-24 bg-yellow-500/10 rounded-bl-full pointer-events-none"></div>
-          <div class="flex items-center justify-between pb-4 border-b border-dashed border-gray-300 dark:border-gray-700">
-            <div>
-              <span class="text-xs uppercase font-extrabold tracking-widest text-yellow-600 dark:text-yellow-400">Zero-Commission Rival</span>
-              <h3 class="text-2xl font-extrabold font-brand text-gray-900 dark:text-white mt-0.5">Rapido Ownly</h3>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Same restaurant • Flat fee model</p>
-            </div>
-            <div class="px-2.5 py-1 rounded-full bg-yellow-100 dark:bg-yellow-950/60 text-yellow-700 dark:text-yellow-400 text-[11px] font-bold flex items-center gap-1">
-              <i data-lucide="zap" class="w-3 h-3"></i>
-              Flat Delivery
-            </div>
-          </div>
-
-          <!-- Line items -->
-          <div class="py-5 space-y-2.5 font-mono text-xs sm:text-sm border-b border-dashed border-gray-300 dark:border-gray-700">
-            <div class="flex justify-between items-center text-gray-700 dark:text-gray-300">
-              <span>Base Meal Price</span>
-              <span class="font-semibold text-gray-900 dark:text-white" id="ownly-bill-meal">₹99.00</span>
-            </div>
-            <div class="flex justify-between items-center text-gray-700 dark:text-gray-300">
-              <span>Platform fee</span>
-              <span class="font-bold text-emerald-600">ZERO (₹0)</span>
-            </div>
-            <div class="flex justify-between items-center text-gray-700 dark:text-gray-300">
-              <span>Restaurant packaging</span>
-              <span class="font-semibold text-gray-500">₹0–₹10</span>
-            </div>
-            <div class="flex justify-between items-center text-gray-700 dark:text-gray-300">
-              <span class="flex items-center gap-1">Flat Delivery (&lt;₹400)</span>
-              <span class="font-semibold text-gray-900 dark:text-white" id="ownly-bill-delivery">₹25.00</span>
-            </div>
-            <div class="flex justify-between items-center text-gray-700 dark:text-gray-300">
-              <span>Surge / Rain fee</span>
-              <span class="font-semibold text-emerald-600">None</span>
-            </div>
-          </div>
-
-          <!-- Total -->
-          <div class="pt-5 flex items-end justify-between">
-            <div>
-              <span class="text-[11px] uppercase font-bold tracking-wider text-gray-500">You Pay</span>
-              <div class="text-3xl font-black font-brand text-yellow-600 dark:text-yellow-400 mt-0.5 flex items-baseline gap-1">
-                <span id="ownly-bill-total">₹124</span>
-              </div>
-            </div>
-            <div class="text-right">
-              <span class="text-[10px] text-gray-400 block">Captains do rides & food</span>
-              <span class="text-[11px] font-semibold text-yellow-600">High fleet utilization</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Interactive Bill & Order Economics Simulator Card -->
-      <div class="p-6 sm:p-8 rounded-3xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 shadow-md">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-gray-200 dark:border-gray-700">
-          <div>
-            <div class="flex items-center gap-2">
-              <div class="w-8 h-8 rounded-xl bg-orange-500 text-white flex items-center justify-center">
-                <i data-lucide="sliders" class="w-4 h-4"></i>
-              </div>
-              <h3 class="text-xl font-bold font-brand text-gray-900 dark:text-white">Interactive Order Fee & Basket Simulator</h3>
-            </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Adjust order parameters to see how fee structures diverge between Toing, Swiggy Main, and Rapido Ownly.
-            </p>
-          </div>
-          <!-- Live Savings Pill -->
-          <div class="flex items-center gap-3">
-            <div class="text-right">
-              <span class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold block">Customer Savings</span>
-              <span id="savings-badge-amount" class="text-xl font-extrabold text-emerald-600 font-mono">₹69</span>
-            </div>
-            <div id="savings-badge-pct" class="px-3 py-1.5 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold text-xs">
-              36% Cheaper
-            </div>
-          </div>
-        </div>
-
-        <!-- Controls Row -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 items-center">
-          <!-- Slider: Meal Price -->
-          <div>
-            <div class="flex justify-between items-center mb-2">
-              <label class="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300">Base Food Item Value</label>
-              <span id="sim-meal-val" class="font-mono font-bold text-orange-600 dark:text-orange-400 text-sm">₹99</span>
-            </div>
-            <input type="range" id="sim-meal-price" min="50" max="300" step="5" value="99" class="w-full">
-            <div class="flex justify-between text-[10px] text-gray-400 mt-1">
-              <span>₹50 (Snack)</span>
-              <span>₹99 (Toing Target)</span>
-              <span>₹300 (Standard Meal)</span>
-            </div>
-          </div>
-
-          <!-- Toggles -->
-          <div class="space-y-2">
-            <label class="flex items-center justify-between cursor-pointer p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
-              <span class="text-xs font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
-                <i data-lucide="cloud-rain" class="w-3.5 h-3.5 text-blue-500"></i>
-                Rain Surge (+₹25 on Core)
-              </span>
-              <input type="checkbox" id="sim-rain-toggle" checked class="w-4 h-4 text-orange-500 rounded border-gray-300 focus:ring-orange-400">
-            </label>
-            <label class="flex items-center justify-between cursor-pointer p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
-              <span class="text-xs font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
-                <i data-lucide="package" class="w-3.5 h-3.5 text-amber-500"></i>
-                Restaurant Packaging Charge
-              </span>
-              <input type="checkbox" id="sim-packaging-toggle" checked class="w-4 h-4 text-orange-500 rounded border-gray-300 focus:ring-orange-400">
-            </label>
-            <label class="flex items-center justify-between cursor-pointer p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
-              <span class="text-xs font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
-                <i data-lucide="moon" class="w-3.5 h-3.5 text-purple-500"></i>
-                Late-Night Peak Fee (+₹15 on Core)
-              </span>
-              <input type="checkbox" id="sim-late-toggle" class="w-4 h-4 text-orange-500 rounded border-gray-300 focus:ring-orange-400">
-            </label>
-          </div>
-
-          <!-- Live Margin Status for Toing -->
-          <div class="p-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400 block mb-1">Toing Platform Contribution Math</span>
-            <div id="toing-order-margin" class="px-3 py-1.5 rounded-full text-xs font-bold bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-400 inline-flex items-center gap-1">
-              <i data-lucide="trending-down" class="w-3.5 h-3.5"></i> Platform Burns -₹10 on this order
-            </div>
-            <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-2 leading-tight">
-              At ₹99, rider cost (~₹35) and payment processing exceed platform fee + 15% commission unless batching or cross-fleet routes kick in.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- =========================================================================
-       4. Section 2: Executive Summary & Scope Note
-       ========================================================================= -->
-  <section id="summary" class="py-16 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="mb-4">
-      <span class="swiggy-tag bg-orange-100 dark:bg-orange-950/70 text-orange-700 dark:text-orange-300">
-        <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Executive Brief
-      </span>
-    </div>
-    <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-950 dark:text-white font-brand mb-6 tracking-tight">
-      Summary: When the Convenience Formula Ran Out of Room
-    </h2>
-    <div class="prose dark:prose-invert max-w-none text-base sm:text-lg leading-relaxed text-gray-700 dark:text-gray-300 space-y-5">
-      <p>
-        Swiggy built its name on convenience and speed. By 2025, that formula was running out of room in India’s biggest metros. Core food delivery growth had flattened, the platforms had raised fees repeatedly to protect margins, and a massive wave of price-conscious customers who still ate cheaply at local street-corner restaurants had little reason to order online.
-      </p>
-      <p>
-        <strong>Toing</strong>, launched on <strong>30 August 2025 in Pune</strong>, is Swiggy's counter-stroke: a standalone app that strips out most extraneous charges and anchors strictly on low-priced meals. Within a year, it had expanded to <strong>50 cities</strong>, and Swiggy reported that <strong>two-thirds (66%) of its new users were first-time food delivery customers</strong>. That is the single strongest empirical evidence that Toing is widening the aggregate market rather than merely shifting existing users between apps.
-      </p>
-      <p>
-        The open question, however, is <strong>logistics economics</strong>. Low-priced orders carry virtually the same delivery cost as expensive ones. Toing only works sustainably if Swiggy can bring delivery costs down via rider cross-utilization or earn from alternative streams like restaurant ad inventory. Meanwhile, aggressive rival entrants—most notably <strong>Rapido's Ownly</strong>—are attacking the exact same market gap from an inherently cheaper two-wheeler logistics base.
-      </p>
-    </div>
-
-    <!-- Official Scope Note Callout Box (from PDF) -->
-    <div class="mt-8 p-5 sm:p-6 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border-l-4 border-amber-500 dark:border-amber-600 text-amber-900 dark:text-amber-200">
-      <div class="flex items-start gap-3">
-        <i data-lucide="info" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
-        <div class="text-sm leading-relaxed">
-          <strong class="font-bold block mb-1 text-amber-950 dark:text-amber-100 uppercase tracking-wide text-xs">Scope Note on Financial Disclosures</strong>
-          Swiggy does not report Toing as its own financial line. It sits inside a segment titled <strong>"Platform Innovations"</strong> alongside <em>Swiggy Minis, Swiggy Sports, Snacc, and Crew</em>, which earned <strong>₹51 crore of revenue in Q1 FY27</strong>. Anything asserted regarding Toing's exact profitability or contribution margin is therefore strategic inference based on industry filings, unit economics math, and public management commentary.
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- =========================================================================
-       5. Section 3: The Company — Swiggy Q1 FY27 Results Dashboard
-       ========================================================================= -->
-  <section id="the-company" class="py-16 bg-white dark:bg-gray-900/60 border-t border-gray-200 dark:border-gray-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="max-w-3xl mb-12">
-        <span class="swiggy-tag bg-blue-100 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 mb-3">
-          <i data-lucide="building-2" class="w-3.5 h-3.5"></i> Corporate Architecture
-        </span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-950 dark:text-white font-brand tracking-tight mb-4">
-          The Company: Swiggy's Four-Segment Portfolio in Q1 FY27
-        </h2>
-        <p class="text-base text-gray-600 dark:text-gray-300 leading-relaxed">
-          Founded in 2014 by Sriharsha Majety, Nandan Reddy, and Rahul Jaimini, Swiggy listed on the Indian stock exchanges in November 2024. Today, the group operates four distinct engines, each with very different margin profiles.
-        </p>
-      </div>
-
-      <!-- Four Segments Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        <!-- Segment 1: Food Delivery -->
-        <div class="interactive-card p-6 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm relative overflow-hidden">
-          <div class="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-950/60 text-orange-600 flex items-center justify-center mb-4">
-            <i data-lucide="utensils" class="w-5 h-5"></i>
-          </div>
-          <span class="text-xs uppercase font-extrabold tracking-wider text-orange-600">Profit Engine</span>
-          <h3 class="text-lg font-bold font-brand text-gray-900 dark:text-white mt-1">Food Delivery</h3>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-4">The core cash generation engine funding group innovation.</p>
-          <div class="pt-3 border-t border-gray-100 dark:border-gray-700 space-y-1 text-xs">
-            <div class="flex justify-between"><span class="text-gray-400">Q1 FY27 GOV:</span> <strong class="font-mono text-gray-900 dark:text-white">₹9,490 Cr</strong></div>
-            <div class="flex justify-between"><span class="text-gray-400">Q1 FY26 Profit:</span> <strong class="font-mono text-emerald-600">₹202 Cr (+200% YoY)</strong></div>
-          </div>
-        </div>
-
-        <!-- Segment 2: Instamart -->
-        <div class="interactive-card p-6 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm relative overflow-hidden">
-          <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center mb-4">
-            <i data-lucide="shopping-bag" class="w-5 h-5"></i>
-          </div>
-          <span class="text-xs uppercase font-extrabold tracking-wider text-emerald-600">Quick Commerce</span>
-          <h3 class="text-lg font-bold font-brand text-gray-900 dark:text-white mt-1">Instamart</h3>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-4">Spun into wholly owned subsidiary (April 1, 2026).</p>
-          <div class="pt-3 border-t border-gray-100 dark:border-gray-700 space-y-1 text-xs">
-            <div class="flex justify-between"><span class="text-gray-400">Q1 FY27 GOV:</span> <strong class="font-mono text-gray-900 dark:text-white">₹7,907 Cr (+39.8%)</strong></div>
-            <div class="flex justify-between"><span class="text-gray-400">Q1 FY27 Rev:</span> <strong class="font-mono text-gray-900 dark:text-white">₹1,232 Cr (+53%)</strong></div>
-            <div class="flex justify-between"><span class="text-gray-400">Dark Stores:</span> <strong class="font-mono text-gray-900 dark:text-white">1,171 (131 cities)</strong></div>
-          </div>
-        </div>
-
-        <!-- Segment 3: Out-of-Home -->
-        <div class="interactive-card p-6 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm relative overflow-hidden">
-          <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 flex items-center justify-center mb-4">
-            <i data-lucide="wine" class="w-5 h-5"></i>
-          </div>
-          <span class="text-xs uppercase font-extrabold tracking-wider text-blue-600">Dining Out</span>
-          <h3 class="text-lg font-bold font-brand text-gray-900 dark:text-white mt-1">Out-of-Home</h3>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-4">Table reservations, dining privilege discounts & events.</p>
-          <div class="pt-3 border-t border-gray-100 dark:border-gray-700 space-y-1 text-xs">
-            <div class="flex justify-between"><span class="text-gray-400">Q1 FY27 Rev:</span> <strong class="font-mono text-gray-900 dark:text-white">₹126 Cr</strong></div>
-            <div class="flex justify-between"><span class="text-gray-400">Segment Profit:</span> <strong class="font-mono text-emerald-600">₹14 Cr</strong></div>
-          </div>
-        </div>
-
-        <!-- Segment 4: Platform Innovations -->
-        <div class="interactive-card p-6 rounded-2xl bg-white dark:bg-gray-800 border-2 border-orange-500/30 dark:border-orange-500/40 shadow-sm relative overflow-hidden">
-          <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 flex items-center justify-center mb-4">
-            <i data-lucide="flask-conical" class="w-5 h-5"></i>
-          </div>
-          <span class="text-xs uppercase font-extrabold tracking-wider text-purple-600">Experimental Lab</span>
-          <h3 class="text-lg font-bold font-brand text-gray-900 dark:text-white mt-1">Platform Innovations</h3>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-4">Houses <strong>Toing</strong>, Minis, Sports, Snacc, and Crew.</p>
-          <div class="pt-3 border-t border-gray-100 dark:border-gray-700 space-y-1 text-xs">
-            <div class="flex justify-between"><span class="text-gray-400">Q1 FY27 Rev:</span> <strong class="font-mono text-purple-600 dark:text-purple-400 font-bold">₹51 Cr</strong></div>
-            <div class="flex justify-between"><span class="text-gray-400">Toing Status:</span> <span class="text-orange-500 font-semibold">50 Cities Live</span></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Interactive Charts: Financial Turnaround -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-        <!-- Chart 1: Revenue vs Net Loss YoY -->
-        <div class="p-6 rounded-3xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <h3 class="text-lg font-bold font-brand text-gray-900 dark:text-white">Revenue vs Net Loss Trajectory</h3>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Q1 FY26 vs Q1 FY27 (June 30, 2026) in ₹ Crore</p>
-            </div>
-            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-              Loss Narrowed by 33.9%
-            </span>
-          </div>
-          <div class="h-64 sm:h-72 w-full">
-            <canvas id="revenueTurnaroundChart"></canvas>
-          </div>
-          <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-4 leading-tight">
-            Revenue grew 37.3% YoY to ₹6,812 Cr. Group EBITDA margin (excluding other income) improved from -19.23% to -9.54%, indicating increasing cost discipline.
-          </p>
-        </div>
-
-        <!-- Chart 2: Segment Distribution Pie -->
-        <div class="p-6 rounded-3xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <h3 class="text-lg font-bold font-brand text-gray-900 dark:text-white">Q1 FY27 GOV Portfolio Share</h3>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Total Group Gross Order Value breakdown</p>
-            </div>
-            <span class="text-xs font-mono font-bold text-gray-600 dark:text-gray-300">Total: ₹17,574+ Cr</span>
-          </div>
-          <div class="h-64 sm:h-72 w-full">
-            <canvas id="segmentDistributionChart"></canvas>
-          </div>
-          <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-4 leading-tight">
-            Food Delivery remains the primary volume generator (₹9,490 Cr), while Instamart (₹7,907 Cr) continues to close the gap at 39.8% YoY growth.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- =========================================================================
-       6. Section 4: The Market — Duopoly Stagnation & Fee Escalation
-       ========================================================================= -->
-  <section id="the-market" class="py-16 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="mb-4">
-      <span class="swiggy-tag bg-red-100 dark:bg-red-950/70 text-red-700 dark:text-red-300">
-        <i data-lucide="alert-octagon" class="w-3.5 h-3.5"></i> Market Dynamics
-      </span>
-    </div>
-    <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-950 dark:text-white font-brand mb-6 tracking-tight">
-      The Market: A Duopoly That Stopped Growing Fast
-    </h2>
-    <div class="prose dark:prose-invert max-w-none text-base sm:text-lg leading-relaxed text-gray-700 dark:text-gray-300 space-y-6">
-      <p>
-        For most of the past decade, online food delivery in India was a predictable two-horse race: <strong>Swiggy</strong> and <strong>Zomato</strong> (now part of Eternal). In recent quarters, however, both companies acknowledged that core food delivery growth in large Tier-1 metros had reached a natural saturation plateau. Concurrently, both players diverted substantial cash flow generated by food delivery to wage an all-out capital war in quick commerce.
-      </p>
-
-      <!-- Visual Step Ladder: Fee Escalation -->
-      <div class="my-8 p-6 rounded-3xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700">
-        <h4 class="text-base font-bold font-brand text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-          <i data-lucide="trending-up" class="w-4 h-4 text-orange-500"></i> The Platform Fee Creep: How ₹2 Became ₹14
-        </h4>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mb-6">
-          To bolster margins, platforms hiked non-food platform fees repeatedly, triggering visible consumer fee fatigue.
-        </p>
-        
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-          <div class="p-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
-            <span class="text-xs text-gray-400 block font-mono">Early 2023</span>
-            <div class="text-2xl font-black text-gray-900 dark:text-white mt-1">₹2.00</div>
-            <span class="text-[11px] text-gray-500">Pilot rollout</span>
-          </div>
-          <div class="p-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
-            <span class="text-xs text-gray-400 block font-mono">Late 2023</span>
-            <div class="text-2xl font-black text-gray-900 dark:text-white mt-1">₹5.00</div>
-            <span class="text-[11px] text-gray-500">Normalized charge</span>
-          </div>
-          <div class="p-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
-            <span class="text-xs text-gray-400 block font-mono">Early 2025</span>
-            <div class="text-2xl font-black text-gray-900 dark:text-white mt-1">₹10.00</div>
-            <span class="text-[11px] text-gray-500">IPO margin ramp</span>
-          </div>
-          <div class="p-4 rounded-2xl bg-orange-50 dark:bg-orange-950/60 border-2 border-orange-500">
-            <span class="text-xs text-orange-600 block font-mono font-bold">August 2025</span>
-            <div class="text-2xl font-black text-orange-600 mt-1">₹14.00</div>
-            <span class="text-[11px] text-orange-700 dark:text-orange-300 font-semibold">+ 18% GST on fees</span>
-          </div>
-        </div>
-      </div>
-
-      <p>
-        The consequence was a glaring price distortion. A hot dosa, paratha, or thali consumed at a local darshini or dhaba cost roughly <strong>₹100</strong>. When ordered via the main app, adding delivery charges, rain surcharges, packaging costs, and platform fees pushed the bill to <strong>₹200 to ₹300</strong>—more than double or triple the food value!
-      </p>
-
-      <!-- Restaurant Rebellion Box -->
-      <div class="p-5 rounded-2xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900">
-        <h4 class="text-sm font-bold text-red-900 dark:text-red-200 flex items-center gap-2 mb-1">
-          <i data-lucide="store" class="w-4 h-4 text-red-600"></i> Restaurant Pushback & Meituan Benchmark
-        </h4>
-        <p class="text-xs text-red-800 dark:text-red-300 leading-relaxed">
-          Reporting from Bengaluru revealed small and mid-sized eateries actively rebelling against 25-32% commission take rates. <em>Reuters Breakingviews</em> underscored that Indian food platform take rates had surged well above China's Meituan—constricting growth and opening a wide flank for a lean, low-fee challenger to enter.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- =========================================================================
-       7. Section 5: The Strategic Trilemma
-       ========================================================================= -->
-  <section id="the-problem" class="py-16 bg-gray-50 dark:bg-gray-900/40 border-y border-gray-200 dark:border-gray-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="max-w-3xl mb-12">
-        <span class="swiggy-tag bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 mb-3">
-          <i data-lucide="target" class="w-3.5 h-3.5"></i> The Dilemma
-        </span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-950 dark:text-white font-brand tracking-tight mb-4">
-          The Problem: Three Pressures Pulling in Opposing Directions
-        </h2>
-        <p class="text-base text-gray-600 dark:text-gray-300 leading-relaxed">
-          In mid-2025, Swiggy management was caught in an acute strategic trilemma:
-        </p>
-      </div>
-
-      <!-- Trilemma 3-Column Layout -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-        <!-- Pillar 1: Growth -->
-        <div class="p-6 sm:p-8 rounded-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm relative">
-          <div class="w-12 h-12 rounded-2xl bg-orange-100 dark:bg-orange-950/60 text-orange-600 flex items-center justify-center mb-5 text-xl font-bold font-brand">
-            01
-          </div>
-          <h3 class="text-xl font-extrabold font-brand text-gray-900 dark:text-white mb-2">Growth Stagnation</h3>
-          <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-            Existing metro cohorts ordered less frequently due to price inflation. Non-users completely rejected ordering online due to the massive gap between offline restaurant prices and final checkout screens.
-          </p>
-        </div>
-
-        <!-- Pillar 2: Competition -->
-        <div class="p-6 sm:p-8 rounded-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm relative">
-          <div class="w-12 h-12 rounded-2xl bg-red-100 dark:bg-red-950/60 text-red-600 flex items-center justify-center mb-5 text-xl font-bold font-brand">
-            02
-          </div>
-          <h3 class="text-xl font-extrabold font-brand text-gray-900 dark:text-white mb-2">Aggressive Rivals</h3>
-          <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-            <strong>Rapido</strong> launched <em>Ownly</em> with a disruptive zero-commission model and flat ₹25 delivery. Eternal pushed <em>Bistro</em> for automated mid-market food, and Flipkart prepared ONDC food delivery pilots in Bengaluru.
-          </p>
-        </div>
-
-        <!-- Pillar 3: Profitability -->
-        <div class="p-6 sm:p-8 rounded-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm relative">
-          <div class="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center mb-5 text-xl font-bold font-brand">
-            03
-          </div>
-          <h3 class="text-xl font-extrabold font-brand text-gray-900 dark:text-white mb-2">Public Market Discipline</h3>
-          <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-            Post-IPO investors demanded losses narrow continuously. With Instamart burning hundreds of crores in quick commerce dark-store expansion, Swiggy could not afford to sacrifice core food delivery margins on blanket discounts.
-          </p>
-        </div>
-      </div>
-
-      <!-- The Central Decision Callout -->
-      <div class="p-8 rounded-3xl bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-xl relative overflow-hidden">
-        <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
-        <div class="max-w-3xl relative z-10">
-          <span class="text-xs uppercase font-extrabold tracking-widest text-orange-200 block mb-2">The Critical Fork in the Road</span>
-          <h3 class="text-2xl sm:text-3xl font-extrabold font-brand leading-snug">
-            "Should Swiggy defend its core app with fee cuts and discounts, or build a separate low-cost app that protects core margins while testing whether everyday cheap meals can be profitable on their own?"
-          </h3>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- =========================================================================
-       8. Section 6: What Toing Is — Product Design & Evolution Timeline
-       ========================================================================= -->
-  <section id="what-is-toing" class="py-16 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="mb-4">
-      <span class="swiggy-tag bg-orange-100 dark:bg-orange-950/70 text-orange-700 dark:text-orange-300">
-        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Product Anatomy
-      </span>
-    </div>
-    <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-950 dark:text-white font-brand mb-6 tracking-tight">
-      What Toing Is: The Standalone Budget Play
-    </h2>
-    <div class="prose dark:prose-invert max-w-none text-base sm:text-lg leading-relaxed text-gray-700 dark:text-gray-300 space-y-5">
-      <p>
-        Toing is a standalone mobile application engineered specifically for price-sensitive demographics, notably Gen Z college students and early-career professionals. Swiggy deliberately chose a <strong>distinct standalone application and brand</strong> rather than introducing a discounted sub-tab inside the flagship Swiggy app.
-      </p>
-      <p>
-        Why? Because keeping Toing separate prevents high-paying users on the main Swiggy app from demanding identical zero-fee terms, thus ring-fencing the premium fee structure that fuels Swiggy's EBITDA.
-      </p>
-    </div>
-
-    <!-- Timeline: How It Developed -->
-    <div class="mt-12">
-      <h3 class="text-xl font-bold font-brand text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-        <i data-lucide="clock" class="w-5 h-5 text-orange-500"></i> Chronology: How Toing Developed in 12 Months
-      </h3>
-
-      <div class="relative border-l-2 border-orange-200 dark:border-gray-800 ml-4 pl-6 sm:pl-8 space-y-8">
-        <!-- Milestone 1 -->
-        <div class="relative group">
-          <div class="absolute -left-[35px] sm:-left-[43px] top-1 w-6 h-6 rounded-full bg-white dark:bg-gray-900 border-4 border-orange-500"></div>
-          <span class="text-xs font-mono font-bold text-orange-600 block">Aug 30, 2025</span>
-          <h4 class="text-base font-bold text-gray-900 dark:text-white mt-0.5">Soft Launch in Select Pune Localities</h4>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Piloted in student hubs with roughly 500 downloads in the first week to stress-test 30-minute delivery SLAs.
-          </p>
-        </div>
-
-        <!-- Milestone 2 -->
-        <div class="relative group">
-          <div class="absolute -left-[35px] sm:-left-[43px] top-1 w-6 h-6 rounded-full bg-white dark:bg-gray-900 border-4 border-orange-500"></div>
-          <span class="text-xs font-mono font-bold text-orange-600 block">Sept 2025</span>
-          <h4 class="text-base font-bold text-gray-900 dark:text-white mt-0.5">Scale to 1,000+ Pune Restaurants</h4>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Formalized standard proposition: meals strictly under ₹99, free delivery on orders above ₹99, flat platform fee of ₹12, zero restaurant packaging charges.
-          </p>
-        </div>
-
-        <!-- Milestone 3 -->
-        <div class="relative group">
-          <div class="absolute -left-[35px] sm:-left-[43px] top-1 w-6 h-6 rounded-full bg-white dark:bg-gray-900 border-4 border-orange-500"></div>
-          <span class="text-xs font-mono font-bold text-orange-600 block">Late 2025</span>
-          <h4 class="text-base font-bold text-gray-900 dark:text-white mt-0.5">Rohit Kapoor Identifies the Affordability Unlock</h4>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1 italic">
-            "Affordability is the single largest unlock for the entire food category in India." — Rohit Kapoor, CEO of Swiggy Food Marketplace.
-          </p>
-        </div>
-
-        <!-- Milestone 4 -->
-        <div class="relative group">
-          <div class="absolute -left-[35px] sm:-left-[43px] top-1 w-6 h-6 rounded-full bg-white dark:bg-gray-900 border-4 border-orange-500"></div>
-          <span class="text-xs font-mono font-bold text-orange-600 block">Early 2026</span>
-          <h4 class="text-base font-bold text-gray-900 dark:text-white mt-0.5">National Brand Film Launch</h4>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Aggressive marketing campaign highlighting zero packaging fees, zero hidden surges, and menu pricing identical to walk-in dining.
-          </p>
-        </div>
-
-        <!-- Milestone 5 -->
-        <div class="relative group">
-          <div class="absolute -left-[35px] sm:-left-[43px] top-1 w-6 h-6 rounded-full bg-white dark:bg-gray-900 border-4 border-emerald-500"></div>
-          <span class="text-xs font-mono font-bold text-emerald-600 block">Q1 FY27 (June 2026)</span>
-          <h4 class="text-base font-bold text-gray-900 dark:text-white mt-0.5">50 Cities Live; 66% First-Time Users</h4>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Toing reaches national footprint across 50 tier-1 and tier-2 markets, confirming that 2/3 of acquired users had never previously ordered food online.
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Sibling Innovation Products Grid -->
-    <div class="mt-12 p-6 rounded-3xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700">
-      <h4 class="text-sm font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">
-        Part of Swiggy's Multi-Tier Speed & Budget Matrix
-      </h4>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="p-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
-          <span class="text-xs font-bold text-orange-600">Bolt</span>
-          <div class="text-base font-bold text-gray-900 dark:text-white mt-1">10-Minute Delivery</div>
-          <p class="text-xs text-gray-500 mt-1">Instant meals from hyper-local restaurant partners with prepped menus.</p>
-        </div>
-        <div class="p-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
-          <span class="text-xs font-bold text-purple-600">Snacc</span>
-          <div class="text-base font-bold text-gray-900 dark:text-white mt-1">15-Minute Quick Bites</div>
-          <p class="text-xs text-gray-500 mt-1">Targeting chai, samosas, and evening office snacking cravings.</p>
-        </div>
-        <div class="p-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
-          <span class="text-xs font-bold text-emerald-600">₹99 Store</span>
-          <div class="text-base font-bold text-gray-900 dark:text-white mt-1">In-App Discount Tab</div>
-          <p class="text-xs text-gray-500 mt-1">Curated budget section nestled inside the main Swiggy app.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Fact-Check Warning Box (from PDF) -->
-    <div class="mt-6 p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200">
-      <div class="flex items-start gap-3">
-        <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
-        <div>
-          <strong class="font-bold">A Figure to Treat With Care:</strong> One aggregator publication reported Toing at <em>33 million weekly active users</em> (just shy of Zomato). This is highly unlikely, as Swiggy's entire disclosed monthly transacting user base for Instamart was 27.5 million. The 33M figure likely reflects a misattributed group-level metric and should not be relied upon without audited filing verification.
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- =========================================================================
-       9. Section 7: The Numbers — Q1 FY27 Financials & Market Reaction
-       ========================================================================= -->
-  <section id="the-numbers" class="py-16 bg-white dark:bg-gray-900/60 border-t border-gray-200 dark:border-gray-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="max-w-3xl mb-12">
-        <span class="swiggy-tag bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 mb-3">
-          <i data-lucide="table" class="w-3.5 h-3.5"></i> Financial Disclosures
-        </span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-950 dark:text-white font-brand tracking-tight mb-4">
-          The Numbers: Q1 FY27 Results Announced 30 July 2026
-        </h2>
-        <p class="text-base text-gray-600 dark:text-gray-300 leading-relaxed">
-          The Q1 FY27 scorecard revealed disciplined operational improvements, but public markets remained skeptical about the capital required to fight simultaneous battles in quick commerce and budget delivery.
-        </p>
-      </div>
-
-      <!-- Financial Scorecards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        <div class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Group Revenue</span>
-          <div class="text-3xl font-black text-gray-900 dark:text-white font-brand mt-1">₹6,812 cr</div>
-          <div class="text-xs text-emerald-600 font-semibold mt-1 flex items-center gap-1">
-            <i data-lucide="trending-up" class="w-3 h-3"></i> +37.3% YoY growth
-          </div>
-        </div>
-
-        <div class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Group Net Loss</span>
-          <div class="text-3xl font-black text-red-600 dark:text-red-400 font-brand mt-1">₹791 cr</div>
-          <div class="text-xs text-gray-500 mt-1">Down from ₹1,197 cr (Q1 FY26)</div>
-        </div>
-
-        <div class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Instamart Contribution</span>
-          <div class="text-3xl font-black text-emerald-600 font-brand mt-1">-0.2%</div>
-          <div class="text-xs text-gray-500 mt-1">Hit break-even in May 2026</div>
-        </div>
-
-        <div class="p-6 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Instamart Dark Stores</span>
-          <div class="text-3xl font-black text-gray-900 dark:text-white font-brand mt-1">1,171</div>
-          <div class="text-xs text-gray-500 mt-1">Across 131 cities (+75 in Q2)</div>
-        </div>
-      </div>
-
-      <!-- Instamart Chart & Market Reaction Row -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-        <!-- Instamart Margin Chart -->
-        <div class="p-6 rounded-3xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <h3 class="text-lg font-bold font-brand text-gray-900 dark:text-white">Instamart Margin Turnaround</h3>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Contribution Margin as % of GOV (The Blueprint for Toing)</p>
-            </div>
-            <span class="text-xs font-mono font-bold text-emerald-600">+440 bps YoY</span>
-          </div>
-          <div class="h-64 sm:h-72 w-full">
-            <canvas id="instamartMarginChart"></canvas>
-          </div>
-          <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-4 leading-tight">
-            Instamart demonstrated that hyper-scale operations can reach unit contribution break-even through store density and supply chain optimization. Swiggy seeks to replicate this exact playbook in Toing.
-          </p>
-        </div>
-
-        <!-- How The Market Read It -->
-        <div class="p-6 sm:p-8 rounded-3xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <span class="text-xs uppercase font-extrabold tracking-wider text-red-600 flex items-center gap-1">
-                <i data-lucide="trending-down" class="w-3.5 h-3.5"></i> Market Verdict
-              </span>
-              <span class="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                Share Price: ₹280.20
-              </span>
-            </div>
-            <h3 class="text-2xl font-bold font-brand text-gray-900 dark:text-white mb-3">
-              Shares Fell 5.3% Intraday on Earnings Day
-            </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed space-y-2 mb-4">
-              Brokerage commentary post-results was distinctly mixed. <strong>CLSA</strong> noted that core food delivery GOV growth slightly missed estimates and continued to trail Zomato.
-            </p>
-            <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed mb-4">
-              Other analysts sharply increased their projected adjusted EBITDA losses for Instamart to <strong>₹3,100 crore for FY27</strong> and <strong>₹2,300 crore for FY28</strong> (up from earlier projections of ₹2,100 crore and ₹500 crore).
-            </p>
-          </div>
-
-          <div class="p-4 rounded-2xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800 text-xs text-orange-900 dark:text-orange-200">
-            <strong>The Direct Implication for Toing:</strong> Group cash is under heavy demand from Instamart. Any budget-delivery push cannot be allowed to erode food delivery's core profits for long.
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- =========================================================================
-       10. Section 8: Rivals — The Competitive Matrix & The Rapido Paradox
-       ========================================================================= -->
-  <section id="rivals" class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="max-w-3xl mb-8">
-      <span class="swiggy-tag bg-orange-100 dark:bg-orange-950/70 text-orange-700 dark:text-orange-300 mb-3">
-        <i data-lucide="swords" class="w-3.5 h-3.5"></i> Competitive Matrix
-      </span>
-      <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-950 dark:text-white font-brand tracking-tight mb-4">
-        Rivals: The Battle for India's ₹99 Food Tray
-      </h2>
-      <p class="text-base text-gray-600 dark:text-gray-300 leading-relaxed">
-        Toing is not operating in a vacuum. Different challengers enter with radically different cost structures and logistical starting points.
-      </p>
-    </div>
-
-    <!-- Filter Buttons -->
-    <div class="flex flex-wrap gap-2 mb-8">
-      <button class="rival-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-orange-500 text-white transition-all" data-filter="all">All Contenders</button>
-      <button class="rival-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-orange-100 transition-all" data-filter="swiggy">Toing (Swiggy)</button>
-      <button class="rival-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-orange-100 transition-all" data-filter="rapido">Ownly (Rapido)</button>
-      <button class="rival-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-orange-100 transition-all" data-filter="zomato">Bistro (Eternal)</button>
-      <button class="rival-filter-btn px-4 py-2 rounded-xl text-xs font-bold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-orange-100 transition-all" data-filter="ondc">Flipkart (ONDC)</button>
-    </div>
-
-    <!-- Rivals Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-      <!-- Player 1: Toing -->
-      <div class="rival-card p-6 rounded-3xl bg-white dark:bg-gray-800 border-2 border-orange-500/40 shadow-sm" data-category="swiggy">
-        <div class="flex items-center justify-between mb-3">
-          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-orange-100 dark:bg-orange-950 text-orange-600">Incumbent Standalone</span>
-          <span class="text-xs font-mono font-bold text-gray-400">50 Cities</span>
-        </div>
-        <h3 class="text-xl font-bold font-brand text-gray-900 dark:text-white">Toing (Swiggy)</h3>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-4">Budget app, zero platform & packaging fees, meals under ₹99.</p>
-
-        <div class="space-y-3 text-xs pt-3 border-t border-gray-100 dark:border-gray-700">
-          <div>
-            <span class="font-bold text-emerald-600 block mb-0.5">Structural Edge:</span>
-            <span class="text-gray-600 dark:text-gray-300">Existing deep restaurant ties; ability to cross-route riders between Bolt, Snacc, and Instamart.</span>
-          </div>
-          <div>
-            <span class="font-bold text-red-600 block mb-0.5">Weak Point:</span>
-            <span class="text-gray-600 dark:text-gray-300">Shares cost base with a loss-making parent; cannibalization risk on core Swiggy orders.</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Player 2: Rapido Ownly -->
-      <div class="rival-card p-6 rounded-3xl bg-white dark:bg-gray-800 border-2 border-yellow-500/40 shadow-sm" data-category="rapido">
-        <div class="flex items-center justify-between mb-3">
-          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-yellow-100 dark:bg-yellow-950 text-yellow-700 dark:text-yellow-400">Logistics Disrupter</span>
-          <span class="text-xs font-mono font-bold text-gray-400">Bengaluru (10%)</span>
-        </div>
-        <h3 class="text-xl font-bold font-brand text-gray-900 dark:text-white">Ownly (Rapido)</h3>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-4">Zero commission to restaurants, flat ₹25 delivery (&lt;₹400), ₹50 (&gt;₹400).</p>
-
-        <div class="space-y-3 text-xs pt-3 border-t border-gray-100 dark:border-gray-700">
-          <div>
-            <span class="font-bold text-emerald-600 block mb-0.5">Structural Edge:</span>
-            <span class="text-gray-600 dark:text-gray-300">Bike-taxi captains do both passenger rides and food delivery, maximizing rider asset utilization.</span>
-          </div>
-          <div>
-            <span class="font-bold text-red-600 block mb-0.5">Weak Point:</span>
-            <span class="text-gray-600 dark:text-gray-300">Smaller restaurant catalogue and limited footprint beyond Bengaluru core.</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Player 3: Bistro (Eternal / Zomato) -->
-      <div class="rival-card p-6 rounded-3xl bg-white dark:bg-gray-800 border-2 border-red-500/40 shadow-sm" data-category="zomato">
-        <div class="flex items-center justify-between mb-3">
-          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-red-100 dark:bg-red-950 text-red-600">Mid-Market Quick</span>
-          <span class="text-xs font-mono font-bold text-gray-400">Eternal / Zomato</span>
-        </div>
-        <h3 class="text-xl font-bold font-brand text-gray-900 dark:text-white">Bistro (Eternal)</h3>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-4">Rapid food delivery utilizing automated kitchens and streamlined menus.</p>
-
-        <div class="space-y-3 text-xs pt-3 border-t border-gray-100 dark:border-gray-700">
-          <div>
-            <span class="font-bold text-emerald-600 block mb-0.5">Structural Edge:</span>
-            <span class="text-gray-600 dark:text-gray-300">Massive Zomato network and superior group cash generation ($1.5B+ balance sheet).</span>
-          </div>
-          <div>
-            <span class="font-bold text-red-600 block mb-0.5">Weak Point:</span>
-            <span class="text-gray-600 dark:text-gray-300">Positioned above the true ₹99 budget tier; Eternal management claims limited initial impact.</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Player 4: Flipkart (ONDC) -->
-      <div class="rival-card p-6 rounded-3xl bg-white dark:bg-gray-800 border-2 border-blue-500/40 shadow-sm" data-category="ondc">
-        <div class="flex items-center justify-between mb-3">
-          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-blue-100 dark:bg-blue-950 text-blue-600">Open Network</span>
-          <span class="text-xs font-mono font-bold text-gray-400">Pilots</span>
-        </div>
-        <h3 class="text-xl font-bold font-brand text-gray-900 dark:text-white">Flipkart (ONDC)</h3>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-4">Leveraging government-backed open protocol for low-fee food ordering.</p>
-
-        <div class="space-y-3 text-xs pt-3 border-t border-gray-100 dark:border-gray-700">
-          <div>
-            <span class="font-bold text-emerald-600 block mb-0.5">Structural Edge:</span>
-            <span class="text-gray-600 dark:text-gray-300">Massive existing 500M+ e-commerce customer base and deep capital reserves.</span>
-          </div>
-          <div>
-            <span class="font-bold text-red-600 block mb-0.5">Weak Point:</span>
-            <span class="text-gray-600 dark:text-gray-300">Not yet scaled nationally; ONDC customer service SLAs remain inconsistent.</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- The Rapido Paradox Callout (from PDF) -->
-    <div id="rapido-paradox" class="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-gray-900 to-gray-950 text-white border border-gray-800 shadow-xl">
-      <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-        <div class="space-y-2 max-w-3xl">
-          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
-            <i data-lucide="git-branch" class="w-3.5 h-3.5"></i> The Frenemy Dilemma
-          </div>
-          <h3 class="text-2xl font-bold font-brand">The Rapido Paradox: Investor vs Competitor</h3>
-          <p class="text-sm text-gray-300 leading-relaxed">
-            At the time of Rapido Ownly's pilot launch, <strong>Swiggy was an early investor in Rapido</strong>, and Dutch technology powerhouse <strong>Prosus held major equity stakes in both companies</strong>. A strategic partner that originated as a two-wheeler fleet capacity supplier to Swiggy transformed into its fiercest budget rival. Swiggy now must weigh the capital appreciation of its Rapido stake against the existential margin erosion of its own food delivery empire.
-          </p>
-        </div>
-        <div class="shrink-0 p-5 rounded-2xl bg-white/5 border border-white/10 text-center">
-          <span class="text-[11px] uppercase tracking-wider text-gray-400 block font-semibold">Shared Equity</span>
-          <div class="text-2xl font-black font-brand text-yellow-400 mt-1">Prosus + Swiggy</div>
-          <span class="text-[10px] text-gray-400 mt-0.5 block">Dual Shareholder Exposure</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- =========================================================================
-       11. Section 9: Analysis — The Hard Math of ₹99 Delivery
-       ========================================================================= -->
-  <section id="analysis" class="py-16 bg-white dark:bg-gray-900/60 border-t border-gray-200 dark:border-gray-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="max-w-3xl mb-12">
-        <span class="swiggy-tag bg-red-100 dark:bg-red-950/70 text-red-700 dark:text-red-300 mb-3">
-          <i data-lucide="calculator" class="w-3.5 h-3.5"></i> Unit Economics
-        </span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-950 dark:text-white font-brand tracking-tight mb-4">
-          Analysis: Unit Economics — The Hard Math
-        </h2>
-        <p class="text-base text-gray-600 dark:text-gray-300 leading-relaxed">
-          Food delivery is ruled by an uncompromising physical constraint: <strong>a delivery has a fixed minimum floor cost</strong> regardless of what the food inside the bag is worth.
-        </p>
-      </div>
-
-      <!-- Unit Economics Chart & Insight -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch mb-12">
-        <!-- Chart 3 -->
-        <div class="p-6 rounded-3xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <h3 class="text-lg font-bold font-brand text-gray-900 dark:text-white">Where Every Rupee Goes</h3>
-              <p class="text-xs text-gray-500 dark:text-gray-400">Stacked Cost Breakdown: ₹99 Toing Order vs ₹700 Core Order</p>
-            </div>
-            <span class="text-xs font-mono font-bold text-red-600">Fixed Cost Dilemma</span>
-          </div>
-          <div class="h-64 sm:h-72 w-full">
-            <canvas id="unitEconomicsChart"></canvas>
-          </div>
-          <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-4 leading-tight">
-            On a ₹700 order, the ₹42 rider payout represents just ~6% of the transaction value. On a ₹99 order, the ₹35 rider payout alone accounts for over 35% of the total food value!
-          </p>
-        </div>
-
-        <!-- 3 Levers Cards -->
-        <div class="space-y-4 flex flex-col justify-between">
-          <div class="p-6 rounded-2xl bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800">
-            <h4 class="text-sm font-bold uppercase tracking-wider text-orange-700 dark:text-orange-300 flex items-center gap-2 mb-2">
-              <i data-lucide="compass" class="w-4 h-4"></i> Toing's Three Escape Hatches
-            </h4>
-            <p class="text-xs text-orange-900 dark:text-orange-200 leading-relaxed">
-              For Toing to turn a profit without raising fees back to ₹193, management must execute on three operational levers:
-            </p>
-          </div>
-
-          <div class="p-5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
-            <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-xl bg-orange-100 dark:bg-orange-950 text-orange-600 flex items-center justify-center shrink-0 font-bold">1</div>
-              <div>
-                <h5 class="text-sm font-bold text-gray-900 dark:text-white">Interleaved Rider Utilization</h5>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  Routing riders between morning grocery peaks on Instamart, afternoon budget lunches on Toing, and evening quick deliveries on Bolt to minimize paid idle wait hours.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="p-5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
-            <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center shrink-0 font-bold">2</div>
-              <div>
-                <h5 class="text-sm font-bold text-gray-900 dark:text-white">Daily Habitual Order Frequency</h5>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  Transforming food delivery from an occasional weekend indulgence (2x/month) into a daily office lunch and dinner routine (20x/month), spreading customer acquisition cost (CAC) over hundreds of lifetime orders.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="p-5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
-            <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-600 flex items-center justify-center shrink-0 font-bold">3</div>
-              <div>
-                <h5 class="text-sm font-bold text-gray-900 dark:text-white">Merchant Advertising & B2B Monetization</h5>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  Monetizing the massive Gen Z eyeballs through sponsored restaurant placement, co-branded FMCG banners, and kitchen supply chain procurement.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SWOT Analysis Quadrants -->
-      <div id="swot" class="pt-8">
-        <h3 class="text-2xl font-bold font-brand text-gray-900 dark:text-white mb-6">Strategic SWOT Matrix</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Strengths -->
-          <div class="p-6 rounded-3xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800">
-            <div class="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-bold text-sm uppercase tracking-wider mb-3">
-              <i data-lucide="check-circle" class="w-4 h-4"></i> Strengths
-            </div>
-            <ul class="space-y-2 text-xs text-gray-700 dark:text-gray-300">
-              <li class="flex items-start gap-2"><span class="text-emerald-500 font-bold">•</span> <strong>Market Expansion Proof:</strong> 66% (2/3) of new users are first-time online food delivery consumers.</li>
-              <li class="flex items-start gap-2"><span class="text-emerald-500 font-bold">•</span> <strong>Separate Brand Moat:</strong> Isolates budget experimentation without diluting Swiggy's premium brand equity.</li>
-              <li class="flex items-start gap-2"><span class="text-emerald-500 font-bold">•</span> <strong>Shared Infrastructure:</strong> Pre-existing relationships with 200,000+ restaurants and shared 400,000+ rider fleet.</li>
-              <li class="flex items-start gap-2"><span class="text-emerald-500 font-bold">•</span> <strong>High Clarity Proposition:</strong> Direct messaging solving consumer anger over hidden fees.</li>
-            </ul>
-          </div>
-
-          <!-- Weaknesses -->
-          <div class="p-6 rounded-3xl bg-red-50/60 dark:bg-red-950/20 border border-red-200 dark:border-red-800">
-            <div class="flex items-center gap-2 text-red-700 dark:text-red-400 font-bold text-sm uppercase tracking-wider mb-3">
-              <i data-lucide="x-circle" class="w-4 h-4"></i> Weaknesses
-            </div>
-            <ul class="space-y-2 text-xs text-gray-700 dark:text-gray-300">
-              <li class="flex items-start gap-2"><span class="text-red-500 font-bold">•</span> <strong>Zero Financial Disclosure:</strong> Sits obscured inside Platform Innovations without standalone unit economics.</li>
-              <li class="flex items-start gap-2"><span class="text-red-500 font-bold">•</span> <strong>Brutal Basket Economics:</strong> Low order values (&lt;₹120) paired against non-negotiable delivery floor costs.</li>
-              <li class="flex items-start gap-2"><span class="text-red-500 font-bold">•</span> <strong>Group Loss Overhang:</strong> Swiggy still loss-making (-₹791 Cr), with Instamart claiming available capital.</li>
-              <li class="flex items-start gap-2"><span class="text-red-500 font-bold">•</span> <strong>Food Delivery GOV Lag:</strong> Core food volume growth trailing Zomato.</li>
-            </ul>
-          </div>
-
-          <!-- Opportunities -->
-          <div class="p-6 rounded-3xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
-            <div class="flex items-center gap-2 text-blue-700 dark:text-blue-400 font-bold text-sm uppercase tracking-wider mb-3">
-              <i data-lucide="sparkles" class="w-4 h-4"></i> Opportunities
-            </div>
-            <ul class="space-y-2 text-xs text-gray-700 dark:text-gray-300">
-              <li class="flex items-start gap-2"><span class="text-blue-500 font-bold">•</span> <strong>The ₹100–₹250 Corridor:</strong> Capturing the massive unserved daily meal market between offline dhabas and premium apps.</li>
-              <li class="flex items-start gap-2"><span class="text-blue-500 font-bold">•</span> <strong>Tier-2 & Tier-3 Penetration:</strong> Expansion into non-metro cities where fee sensitivity is paramount.</li>
-              <li class="flex items-start gap-2"><span class="text-blue-500 font-bold">•</span> <strong>Restaurant Partnerships:</strong> Enrolling mid-tier restaurants dissatisfied with 30% take-rates.</li>
-              <li class="flex items-start gap-2"><span class="text-blue-500 font-bold">•</span> <strong>Instamart Cross-Sell:</strong> Up-selling newly acquired Gen Z cohorts to groceries and essentials.</li>
-            </ul>
-          </div>
-
-          <!-- Threats -->
-          <div class="p-6 rounded-3xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
-            <div class="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-bold text-sm uppercase tracking-wider mb-3">
-              <i data-lucide="alert-triangle" class="w-4 h-4"></i> Threats
-            </div>
-            <ul class="space-y-2 text-xs text-gray-700 dark:text-gray-300">
-              <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">•</span> <strong>Rapido Ownly's Fleet Flywheel:</strong> Zero-commission model supported by dual-purpose bike taxi captains.</li>
-              <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">•</span> <strong>Core App Cannibalization:</strong> Existing high-margin Swiggy users migrating down to subsidized Toing orders.</li>
-              <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">•</span> <strong>Investor Impatience:</strong> Weak post-earnings stock reaction restricting runway for experimental losses.</li>
-              <li class="flex items-start gap-2"><span class="text-amber-500 font-bold">•</span> <strong>Regulatory Scrutiny:</strong> Ongoing anti-trust investigations into platform fees and GST taxation.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- Cannibalization Simulator Card -->
-      <div id="cannibalization" class="mt-12 p-6 sm:p-8 rounded-3xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-gray-200 dark:border-gray-700">
-          <div>
-            <span class="text-xs uppercase font-extrabold tracking-wider text-orange-600 block mb-1">Critical Strategic Risk</span>
-            <h3 class="text-xl font-bold font-brand text-gray-900 dark:text-white">Cannibalization vs Market Expansion Simulator</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              "If Toing mainly attracts customers who already order on Swiggy, it lowers revenue per order without expanding the total customer pie."
-            </p>
-          </div>
-          <div id="cannibal-net-impact" class="px-3 py-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 inline-flex items-center gap-1">
-            <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i> Controlled Cannibalization
-          </div>
-        </div>
-
-        <div class="pt-6 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-          <div>
-            <div class="flex justify-between items-center mb-2">
-              <span id="cannibal-new-val" class="text-sm font-bold text-emerald-600 font-mono">66% First-Time Users</span>
-              <span id="cannibal-switch-val" class="text-sm font-bold text-red-500 font-mono">34% Existing Switchers</span>
-            </div>
-            <input type="range" id="cannibal-slider" min="20" max="90" step="2" value="66" class="w-full">
-            <div class="flex justify-between text-[10px] text-gray-400 mt-1">
-              <span>20% (Heavy Cannibalization)</span>
-              <span>66% (Current Disclosed)</span>
-              <span>90% (Pure Greenfield)</span>
-            </div>
-          </div>
-          <div>
-            <p id="cannibal-summary-text" class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed p-4 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
-              At 66% genuine new users, Toing expands the market into Gen Z & budget tiers while sacrificing a manageable ~34% of core volume to block Rapido Ownly.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- =========================================================================
-       12. Section 10: Recommendations — The 6 Strategic Mandates
-       ========================================================================= -->
-  <section id="recommendations" class="py-16 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="mb-4">
-      <span class="swiggy-tag bg-orange-100 dark:bg-orange-950/70 text-orange-700 dark:text-orange-300">
-        <i data-lucide="check-square" class="w-3.5 h-3.5"></i> Action Plan
-      </span>
-    </div>
-    <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-950 dark:text-white font-brand mb-4 tracking-tight">
-      Recommendations: Six Strategic Mandates for Swiggy
-    </h2>
-    <p class="text-base text-gray-600 dark:text-gray-300 leading-relaxed mb-10">
-      Based on public filings and unit economic modeling, these six independent recommendations chart a disciplined path forward:
-    </p>
-
-    <!-- 6 Detailed Recommendation Cards -->
-    <div class="space-y-6">
       
-      <!-- Recommendation 1 -->
-      <div class="p-6 sm:p-7 rounded-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:border-orange-400 transition-all">
-        <div class="flex items-start gap-4">
-          <div class="w-10 h-10 rounded-2xl bg-orange-500 text-white font-black text-lg flex items-center justify-center shrink-0">1</div>
-          <div class="space-y-2">
-            <div class="flex flex-wrap items-center gap-2">
-              <h3 class="text-lg font-bold font-brand text-gray-900 dark:text-white">Set Profit Gates Before the Next City Launches</h3>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-red-100 dark:bg-red-950 text-red-600">High Discipline</span>
-            </div>
-            <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-              Tie each expansion wave to an explicit contribution-margin target per city cohort, so rapid growth across 50+ cities does not conceal weak unit economics. Swiggy successfully applied this exact discipline to Instamart (reaching break-even in May 2026); Toing deserves the same gatekeeping.
-            </p>
-          </div>
-        </div>
+      <p class="hero-sub reveal">
+        A product teardown on Swiggy's budget food delivery gamble, the market stagnation that forced it into being, and the <b>brutal unit economics</b> that will decide its fate.
+      </p>
+
+      <div class="reveal" style="margin-top: 2.2rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+        <a href="#problem" class="prd-btn">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-top:-2px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Explore Case Study
+        </a>
+        <a href="#business" class="scroll-cue" style="margin: 0; padding: 0.9rem 1.6rem; border-radius: 999px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25);">
+          Live Rupee Simulator →
+        </a>
       </div>
 
-      <!-- Recommendation 2 -->
-      <div class="p-6 sm:p-7 rounded-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:border-orange-400 transition-all">
-        <div class="flex items-start gap-4">
-          <div class="w-10 h-10 rounded-2xl bg-orange-500 text-white font-black text-lg flex items-center justify-center shrink-0">2</div>
-          <div class="space-y-2">
-            <div class="flex flex-wrap items-center gap-2">
-              <h3 class="text-lg font-bold font-brand text-gray-900 dark:text-white">Attack Delivery Cost First, Fees Second</h3>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-orange-100 dark:bg-orange-950 text-orange-600">Logistics Efficiency</span>
-            </div>
-            <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-              Cluster Toing orders in dense student/office hubs, batch nearby deliveries without compromising 30-minute SLAs, and interleave rider fleets dynamically across Toing, Bolt, Snacc, and Instamart. Further fee reductions are only sustainable once cost-per-drop falls.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Recommendation 3 -->
-      <div class="p-6 sm:p-7 rounded-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:border-orange-400 transition-all">
-        <div class="flex items-start gap-4">
-          <div class="w-10 h-10 rounded-2xl bg-orange-500 text-white font-black text-lg flex items-center justify-center shrink-0">3</div>
-          <div class="space-y-2">
-            <div class="flex flex-wrap items-center gap-2">
-              <h3 class="text-lg font-bold font-brand text-gray-900 dark:text-white">Be Transparent About Restaurant Economics</h3>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-100 dark:bg-blue-950 text-blue-600">Merchant Trust</span>
-            </div>
-            <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-              Zero customer packaging and low platform fees must be funded by someone. If Toing's merchant commission is lower than the core app's 25-30%, communicate that openly to restaurants. Disillusioned restaurants are actively looking at Rapido Ownly; Swiggy must present a defensible win-win.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Recommendation 4 -->
-      <div class="p-6 sm:p-7 rounded-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:border-orange-400 transition-all">
-        <div class="flex items-start gap-4">
-          <div class="w-10 h-10 rounded-2xl bg-orange-500 text-white font-black text-lg flex items-center justify-center shrink-0">4</div>
-          <div class="space-y-2">
-            <div class="flex flex-wrap items-center gap-2">
-              <h3 class="text-lg font-bold font-brand text-gray-900 dark:text-white">Measure and Disclose Cannibalization Cohorts</h3>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-purple-100 dark:bg-purple-950 text-purple-600">Data Analytics</span>
-            </div>
-            <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-              Track the exact share of Toing transactions originating from users who previously ordered frequently on Swiggy's main app alongside new-user growth. Use that data to calibrate capital allocation between standalone Toing and the in-app ₹99 Store.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Recommendation 5 -->
-      <div class="p-6 sm:p-7 rounded-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:border-orange-400 transition-all">
-        <div class="flex items-start gap-4">
-          <div class="w-10 h-10 rounded-2xl bg-orange-500 text-white font-black text-lg flex items-center justify-center shrink-0">5</div>
-          <div class="space-y-2">
-            <div class="flex flex-wrap items-center gap-2">
-              <h3 class="text-lg font-bold font-brand text-gray-900 dark:text-white">Defend Aggressively Where Ownly Is Strongest</h3>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-yellow-100 dark:bg-yellow-950 text-yellow-700">Competitive Defense</span>
-            </div>
-            <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-              Bengaluru is the single market where Rapido Ownly has captured meaningful scale (~10% market share and 50,000+ daily orders). Swiggy must lock in exclusive long-term partnerships with iconic budget kitchens in Indiranagar, Koramangala, and HSR Layout before Ownly consolidates its grip.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Recommendation 6 -->
-      <div class="p-6 sm:p-7 rounded-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:border-orange-400 transition-all">
-        <div class="flex items-start gap-4">
-          <div class="w-10 h-10 rounded-2xl bg-orange-500 text-white font-black text-lg flex items-center justify-center shrink-0">6</div>
-          <div class="space-y-2">
-            <div class="flex flex-wrap items-center gap-2">
-              <h3 class="text-lg font-bold font-brand text-gray-900 dark:text-white">Disclose Toing's Concrete KPIs to Public Investors</h3>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-100 dark:bg-emerald-950 text-emerald-600">Investor Relations</span>
-            </div>
-            <p class="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-              Even limited quarterly disclosure—such as orders per day or contribution margin per mature cohort—would give equity research analysts something to underwrite other than the group's aggregate loss figure, helping stabilize the post-earnings stock volatility.
-            </p>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- =========================================================================
-       13. Section 11: What to Watch — Executive KPI Radar
-       ========================================================================= -->
-  <section id="what-to-watch" class="py-16 bg-white dark:bg-gray-900/60 border-t border-gray-200 dark:border-gray-800">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="mb-8">
-        <span class="swiggy-tag bg-blue-100 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 mb-3">
-          <i data-lucide="eye" class="w-3.5 h-3.5"></i> Leading Indicators
-        </span>
-        <h2 class="text-3xl font-extrabold text-gray-950 dark:text-white font-brand tracking-tight mb-2">
-          What to Watch: The Deciding Indicators
-        </h2>
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          Key metrics that will determine whether Toing becomes a durable pillar or a costly diversion:
+      <!-- Problem Card inside Hero -->
+      <div class="problem-card reveal">
+        <span class="k">⚠ The Opening Dilemma</span>
+        <h3>Online food delivery in metros stopped growing because extra fees doubled the bill.</h3>
+        <p>
+          Between ₹14 platform fees, ₹25 rain charges, packaging surcharges, and delivery fees, an everyday ₹99 lunch exploded to ₹193 at checkout. Toing is Swiggy's radical answer: a standalone app stripping out extras. The unanswered question is <mark>logistics economics</mark>.
         </p>
       </div>
 
-      <div class="overflow-x-auto rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm">
-        <table class="w-full text-left text-xs sm:text-sm">
-          <thead class="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold uppercase tracking-wider text-[11px]">
-            <tr>
-              <th class="py-4 px-6">Indicator</th>
-              <th class="py-4 px-6">Why It Matters</th>
-              <th class="py-4 px-6">Signal To Watch</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-gray-900">
-            <tr>
-              <td class="py-4 px-6 font-bold text-gray-900 dark:text-white">Toing orders/day & per city</td>
-              <td class="py-4 px-6 text-gray-600 dark:text-gray-400">Shows whether 50-city footprint produces genuine density or thin vanity coverage.</td>
-              <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full bg-orange-100 dark:bg-orange-950 text-orange-600 font-semibold">&gt;2,000 orders/city/day</span></td>
-            </tr>
-            <tr>
-              <td class="py-4 px-6 font-bold text-gray-900 dark:text-white">Share of new-to-category users</td>
-              <td class="py-4 px-6 text-gray-600 dark:text-gray-400">Tests whether Toing continues expanding aggregate food delivery adoption.</td>
-              <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-600 font-semibold">Sustained &gt;60%</span></td>
-            </tr>
-            <tr>
-              <td class="py-4 px-6 font-bold text-gray-900 dark:text-white">Contribution margin of Toing orders</td>
-              <td class="py-4 px-6 text-gray-600 dark:text-gray-400">The single deciding mathematical factor for long-term survival.</td>
-              <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-600 font-semibold">Break-even in 18 mo</span></td>
-            </tr>
-            <tr>
-              <td class="py-4 px-6 font-bold text-gray-900 dark:text-white">Main-app food delivery GOV growth</td>
-              <td class="py-4 px-6 text-gray-600 dark:text-gray-400">Reveals whether Toing is quietly dragging away profitable core orders.</td>
-              <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-600 font-semibold">Double-digit YoY</span></td>
-            </tr>
-            <tr>
-              <td class="py-4 px-6 font-bold text-gray-900 dark:text-white">Ownly's expansion outside Bengaluru</td>
-              <td class="py-4 px-6 text-gray-600 dark:text-gray-400">Signals whether Rapido's zero-commission bike-taxi model travels nationally.</td>
-              <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full bg-yellow-100 dark:bg-yellow-950 text-yellow-700 font-semibold">Entry into NCR/Mumbai</span></td>
-            </tr>
-            <tr>
-              <td class="py-4 px-6 font-bold text-gray-900 dark:text-white">Group Adjusted EBITDA & Burn</td>
-              <td class="py-4 px-6 text-gray-600 dark:text-gray-400">Sets the exact limit of public market patience for unmonetized experiments.</td>
-              <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-950 text-red-600 font-semibold">Steady loss reduction</span></td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Hero Statistics -->
+      <div class="hero-stats reveal">
+        <div class="hstat">
+          <div class="n">₹124 vs ₹193</div>
+          <div class="l">The Pune checkout price chasm for identical ₹99 meal</div>
+        </div>
+        <div class="hstat">
+          <div class="n">50 Cities</div>
+          <div class="l">Footprint scaled across India in under 12 months</div>
+        </div>
+        <div class="hstat">
+          <div class="n">66% (2/3)</div>
+          <div class="l">Of acquired users are first-time online food delivery consumers</div>
+        </div>
+        <div class="hstat">
+          <div class="n">₹6,812 Cr</div>
+          <div class="l">Swiggy Q1 FY27 revenue (+37.3% YoY, loss narrowed to ₹791 Cr)</div>
+        </div>
       </div>
-    </div>
-  </section>
 
-  <!-- =========================================================================
-       14. Section 12: Discussion Questions & Interactive Polling Lab
-       ========================================================================= -->
-  <section id="discussion" class="py-16 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="mb-4">
-      <span class="swiggy-tag bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300">
-        <i data-lucide="help-circle" class="w-3.5 h-3.5"></i> Interactive Case Lab
-      </span>
+      <a href="#problem" class="scroll-cue reveal">
+        <span class="chev">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </span>
+        Scroll to begin teardown
+      </a>
     </div>
-    <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-950 dark:text-white font-brand mb-4 tracking-tight">
-      Discussion Questions & Strategy Polls
-    </h2>
-    <p class="text-base text-gray-600 dark:text-gray-300 leading-relaxed mb-10">
-      Cast your vote on the core dilemmas posed by the case study to see live community sentiment and unlock analyst takeaways:
-    </p>
+  </div>
+</section>
 
-    <div class="space-y-8">
+<!-- =========================================================
+     2. PROBLEM & THE BILL CONTRAST (White Panel)
+     ========================================================= -->
+<section class="panel white" id="problem">
+  <div class="slab" data-dir="left">
+    <div class="wrap">
+      <div class="s-kicker reveal">
+        <span class="idx">01</span>
+        <span class="nm">Problem Identification · The Real Bill</span>
+        <span class="ln"></span>
+      </div>
       
-      <!-- Poll 1 -->
-      <div class="poll-item p-6 sm:p-8 rounded-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
-        <span class="text-xs font-mono font-bold text-orange-600 uppercase tracking-wider block mb-1">Question 1</span>
-        <h3 class="text-lg sm:text-xl font-bold font-brand text-gray-900 dark:text-white mb-4">
-          Was launching a separate standalone app the right choice, compared with a cheaper tier inside the main Swiggy app?
-        </h3>
-        <div class="poll-options-container grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-          <button class="poll-option-btn p-3.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-orange-500 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 transition-all flex items-center justify-between" data-option="1">
-            <span>Yes — It protects premium core pricing from brand dilution</span>
-            <i data-lucide="check" class="w-4 h-4 text-orange-500 hidden vote-check"></i>
-          </button>
-          <button class="poll-option-btn p-3.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-orange-500 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 transition-all flex items-center justify-between" data-option="2">
-            <span>No — High CAC and fragmented user acquisition isn't worth it</span>
-            <i data-lucide="check" class="w-4 h-4 text-orange-500 hidden vote-check"></i>
-          </button>
-        </div>
+      <div class="reveal"><span class="eyebrow">The Opening Contrast</span></div>
+      <h2 class="head reveal">The food costs the same.<br>The <span class="hl">extras do not.</span></h2>
+      <p class="lede reveal">
+        Tested on an identical meal in Pune shortly after launch in September 2025 and reported by <em>Franchise India</em>. It exposes why millions of Indians who eat lunch locally for ₹100 refuse to order on mainstream apps.
+      </p>
 
-        <!-- Hidden Poll Results Bar (reveals upon vote) -->
-        <div class="poll-results hidden space-y-3 pt-3 border-t border-gray-100 dark:border-gray-700 text-xs">
-          <div>
-            <div class="flex justify-between font-bold mb-1">
-              <span>Yes, Protect Core Pricing</span>
-              <span class="text-orange-600 font-mono">68%</span>
+      <!-- Persona Grid -->
+      <div class="persona-row">
+        <!-- Persona Card 1 -->
+        <div class="card reveal stg">
+          <div class="persona-head flex items-center gap-4">
+            <div class="avatar w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-xl text-white bg-gradient-to-br from-orange-400 to-orange-600 shadow-lg">
+              T
             </div>
-            <div class="h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-              <div class="poll-bar-fill h-full bg-orange-500 transition-all duration-700" data-target-pct="68" style="width: 0%"></div>
+            <div>
+              <h3 class="text-xl font-bold font-brand text-gray-900">Arjun &amp; The First-Jobbers</h3>
+              <div class="role text-xs text-gray-500 font-semibold mt-0.5">Anchor Segment · Pune &amp; Tier-2 Metros · Price-sensitive · UPI native</div>
             </div>
           </div>
-          <div>
-            <div class="flex justify-between font-bold mb-1">
-              <span>No, Keep Unified App</span>
-              <span class="text-gray-400 font-mono">32%</span>
+          <ul class="painlist mt-5 space-y-3 text-sm text-gray-600">
+            <li class="flex items-start gap-2.5">
+              <span class="pp p-1.5 rounded-lg bg-orange-100 text-orange-600 font-bold shrink-0">🍱</span>
+              <span><b>The ₹100 Street Dhaba Benchmark:</b> Local thalis and rolls cost ₹90-₹120 offline. An app checkout above ₹180 feels like extortion.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="pp p-1.5 rounded-lg bg-orange-100 text-orange-600 font-bold shrink-0">💸</span>
+              <span><b>Fee Fatigue:</b> Seeing ₹14.99 platform fee, ₹19 packaging, and ₹25 rain charges triggers immediate cart abandonment.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="pp p-1.5 rounded-lg bg-orange-100 text-orange-600 font-bold shrink-0">⚡</span>
+              <span><b>Daily Habit Barrier:</b> Solo eaters won't buy a ₹500 Swiggy One subscription for a ₹90 afternoon snack.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Real Bill Comparison Side-by-Side -->
+        <div class="card reveal stg" data-delay="1">
+          <div class="flex items-center justify-between border-b pb-3 border-orange-100">
+            <span class="text-xs font-bold uppercase tracking-wider text-orange-600">Single-Order Price Test</span>
+            <span class="text-[11px] font-mono bg-orange-100 text-orange-800 px-2 py-0.5 rounded font-bold">Pune September 2025</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 mt-4 text-xs font-mono">
+            <div class="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200">
+              <div class="font-bold text-emerald-800 text-sm font-brand">Toing</div>
+              <div class="mt-2 space-y-1.5 text-gray-700">
+                <div class="flex justify-between"><span>Meal:</span> <strong>₹99.00</strong></div>
+                <div class="flex justify-between"><span>Platform:</span> <strong>₹12.00</strong></div>
+                <div class="flex justify-between"><span>Packaging:</span> <strong class="text-emerald-600">₹0 (None)</strong></div>
+                <div class="flex justify-between"><span>Delivery:</span> <strong class="text-emerald-600">FREE</strong></div>
+                <div class="flex justify-between pt-2 border-t border-emerald-200 text-sm font-bold text-emerald-800">
+                  <span>Checkout:</span> <span>₹124</span>
+                </div>
+              </div>
             </div>
-            <div class="h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-              <div class="poll-bar-fill h-full bg-gray-400 transition-all duration-700" data-target-pct="32" style="width: 0%"></div>
+
+            <div class="p-3.5 rounded-xl bg-red-50/70 border border-red-200">
+              <div class="font-bold text-red-800 text-sm font-brand">Swiggy Main App</div>
+              <div class="mt-2 space-y-1.5 text-gray-700">
+                <div class="flex justify-between"><span>Meal:</span> <strong>₹99.00</strong></div>
+                <div class="flex justify-between"><span>Platform:</span> <strong>₹14.99</strong></div>
+                <div class="flex justify-between"><span>Packaging:</span> <strong>₹19.00</strong></div>
+                <div class="flex justify-between"><span>Delivery + Rain:</span> <strong>₹60.00</strong></div>
+                <div class="flex justify-between pt-2 border-t border-red-200 text-sm font-bold text-red-800">
+                  <span>Checkout:</span> <span>₹193</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <button class="toggle-verdict-btn mt-4 text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1">
-          <i data-lucide="chevron-down" class="w-4 h-4"></i> View Analyst Verdict & Case Takeaway
-        </button>
-        <div class="poll-verdict hidden mt-3 p-4 rounded-2xl bg-orange-50 dark:bg-orange-950/40 text-xs text-orange-950 dark:text-orange-200 leading-relaxed border border-orange-200 dark:border-orange-800">
-          <strong>Analyst Verdict:</strong> A separate app was essential. Had Swiggy offered zero platform fees inside its core app, the 20 million affluent users paying ₹14 platform fees and ₹25 rain charges would immediately defect, destroying food delivery's ₹202 Cr quarterly operating profit.
-        </div>
-      </div>
-
-      <!-- Poll 2 -->
-      <div class="poll-item p-6 sm:p-8 rounded-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
-        <span class="text-xs font-mono font-bold text-orange-600 uppercase tracking-wider block mb-1">Question 2</span>
-        <h3 class="text-lg sm:text-xl font-bold font-brand text-gray-900 dark:text-white mb-4">
-          Who ultimately pays for the "zero platform fee and free delivery" on Toing in the long run?
-        </h3>
-        <div class="poll-options-container grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-          <button class="poll-option-btn p-3.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-orange-500 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 transition-all flex items-center justify-between" data-option="1">
-            <span>Swiggy's balance sheet (cross-subsidized by Food/Instamart)</span>
-            <i data-lucide="check" class="w-4 h-4 text-orange-500 hidden vote-check"></i>
-          </button>
-          <button class="poll-option-btn p-3.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-orange-500 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 transition-all flex items-center justify-between" data-option="2">
-            <span>Restaurants accepting higher volume for lower margins</span>
-            <i data-lucide="check" class="w-4 h-4 text-orange-500 hidden vote-check"></i>
-          </button>
-        </div>
-
-        <div class="poll-results hidden space-y-3 pt-3 border-t border-gray-100 dark:border-gray-700 text-xs">
-          <div>
-            <div class="flex justify-between font-bold mb-1">
-              <span>Swiggy Cross-Subsidy</span>
-              <span class="text-orange-600 font-mono">59%</span>
+          <div class="cost-strip mt-4 grid grid-cols-2 gap-3 text-xs">
+            <div class="ci p-3 rounded-xl bg-orange-50/60 border-l-4 border-orange-500">
+              <div class="n font-bold text-orange-600 text-lg font-brand">+55.6%</div>
+              <div class="l text-gray-500">Markup on main app for the identical kitchen dish</div>
             </div>
-            <div class="h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-              <div class="poll-bar-fill h-full bg-orange-500 transition-all duration-700" data-target-pct="59" style="width: 0%"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between font-bold mb-1">
-              <span>Restaurant Margin Compression</span>
-              <span class="text-gray-400 font-mono">41%</span>
-            </div>
-            <div class="h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-              <div class="poll-bar-fill h-full bg-gray-400 transition-all duration-700" data-target-pct="41" style="width: 0%"></div>
+            <div class="ci p-3 rounded-xl bg-emerald-50/60 border-l-4 border-emerald-500">
+              <div class="n font-bold text-emerald-600 text-lg font-brand">₹69 Saved</div>
+              <div class="l text-gray-500">Direct savings per order on Toing</div>
             </div>
           </div>
         </div>
-
-        <button class="toggle-verdict-btn mt-4 text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1">
-          <i data-lucide="chevron-down" class="w-4 h-4"></i> View Analyst Verdict & Case Takeaway
-        </button>
-        <div class="poll-verdict hidden mt-3 p-4 rounded-2xl bg-orange-50 dark:bg-orange-950/40 text-xs text-orange-950 dark:text-orange-200 leading-relaxed border border-orange-200 dark:border-orange-800">
-          <strong>Analyst Verdict:</strong> Currently, Swiggy is directly underwriting the gap under "Platform Innovations" expenses. In equilibrium, however, restaurants will bear it via sponsored ad auctions to appear at the top of the ₹99 feed.
-        </div>
       </div>
 
-      <!-- Poll 3 -->
-      <div class="poll-item p-6 sm:p-8 rounded-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
-        <span class="text-xs font-mono font-bold text-orange-600 uppercase tracking-wider block mb-1">Question 3</span>
-        <h3 class="text-lg sm:text-xl font-bold font-brand text-gray-900 dark:text-white mb-4">
-          Is Rapido a partner, a competitor, or both for Swiggy?
-        </h3>
-        <div class="poll-options-container grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-          <button class="poll-option-btn p-3.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-orange-500 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 transition-all flex items-center justify-between" data-option="1">
-            <span>Direct competitor — Ownly is attacking core food delivery</span>
-            <i data-lucide="check" class="w-4 h-4 text-orange-500 hidden vote-check"></i>
-          </button>
-          <button class="poll-option-btn p-3.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-orange-500 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 transition-all flex items-center justify-between" data-option="2">
-            <span>Complicated frenemy — Swiggy's equity upside vs margin risk</span>
-            <i data-lucide="check" class="w-4 h-4 text-orange-500 hidden vote-check"></i>
-          </button>
-        </div>
-
-        <div class="poll-results hidden space-y-3 pt-3 border-t border-gray-100 dark:border-gray-700 text-xs">
-          <div>
-            <div class="flex justify-between font-bold mb-1">
-              <span>Complicated Frenemy</span>
-              <span class="text-orange-600 font-mono">74%</span>
-            </div>
-            <div class="h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-              <div class="poll-bar-fill h-full bg-orange-500 transition-all duration-700" data-target-pct="74" style="width: 0%"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between font-bold mb-1">
-              <span>Direct Mortal Competitor</span>
-              <span class="text-gray-400 font-mono">26%</span>
-            </div>
-            <div class="h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-              <div class="poll-bar-fill h-full bg-gray-400 transition-all duration-700" data-target-pct="26" style="width: 0%"></div>
-            </div>
-          </div>
-        </div>
-
-        <button class="toggle-verdict-btn mt-4 text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1">
-          <i data-lucide="chevron-down" class="w-4 h-4"></i> View Analyst Verdict & Case Takeaway
-        </button>
-        <div class="poll-verdict hidden mt-3 p-4 rounded-2xl bg-orange-50 dark:bg-orange-950/40 text-xs text-orange-950 dark:text-orange-200 leading-relaxed border border-orange-200 dark:border-orange-800">
-          <strong>Analyst Verdict:</strong> Classic innovator's dilemma. Swiggy holds a lucrative equity position in Rapido, but Ownly's zero-commission logistics flywheel directly undermines Swiggy's 25% take-rate monopoly.
-        </div>
-      </div>
-
-      <!-- Poll 4 -->
-      <div class="poll-item p-6 sm:p-8 rounded-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
-        <span class="text-xs font-mono font-bold text-orange-600 uppercase tracking-wider block mb-1">Question 4</span>
-        <h3 class="text-lg sm:text-xl font-bold font-brand text-gray-900 dark:text-white mb-4">
-          When should a company stop proliferating sub-brands (Bolt, Snacc, Toing, Minis) and consolidate?
-        </h3>
-        <div class="poll-options-container grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-          <button class="poll-option-btn p-3.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-orange-500 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 transition-all flex items-center justify-between" data-option="1">
-            <span>Now — Brand clutter confuses users and burns marketing budget</span>
-            <i data-lucide="check" class="w-4 h-4 text-orange-500 hidden vote-check"></i>
-          </button>
-          <button class="poll-option-btn p-3.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-orange-500 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 transition-all flex items-center justify-between" data-option="2">
-            <span>After 18 months — Let each model prove unit economics first</span>
-            <i data-lucide="check" class="w-4 h-4 text-orange-500 hidden vote-check"></i>
-          </button>
-        </div>
-
-        <div class="poll-results hidden space-y-3 pt-3 border-t border-gray-100 dark:border-gray-700 text-xs">
-          <div>
-            <div class="flex justify-between font-bold mb-1">
-              <span>Let Models Prove Economics First</span>
-              <span class="text-orange-600 font-mono">61%</span>
-            </div>
-            <div class="h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-              <div class="poll-bar-fill h-full bg-orange-500 transition-all duration-700" data-target-pct="61" style="width: 0%"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between font-bold mb-1">
-              <span>Consolidate Immediately</span>
-              <span class="text-gray-400 font-mono">39%</span>
-            </div>
-            <div class="h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-              <div class="poll-bar-fill h-full bg-gray-400 transition-all duration-700" data-target-pct="39" style="width: 0%"></div>
-            </div>
-          </div>
-        </div>
-
-        <button class="toggle-verdict-btn mt-4 text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1">
-          <i data-lucide="chevron-down" class="w-4 h-4"></i> View Analyst Verdict & Case Takeaway
-        </button>
-        <div class="poll-verdict hidden mt-3 p-4 rounded-2xl bg-orange-50 dark:bg-orange-950/40 text-xs text-orange-950 dark:text-orange-200 leading-relaxed border border-orange-200 dark:border-orange-800">
-          <strong>Analyst Verdict:</strong> Swiggy should run a 12-month bake-off between Toing and the in-app ₹99 Store. Whichever captures higher LTV-to-CAC should absorb the other before FY28.
-        </div>
-      </div>
-
-      <!-- Poll 5 -->
-      <div class="poll-item p-6 sm:p-8 rounded-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm">
-        <span class="text-xs font-mono font-bold text-orange-600 uppercase tracking-wider block mb-1">Question 5</span>
-        <h3 class="text-lg sm:text-xl font-bold font-brand text-gray-900 dark:text-white mb-4">
-          How should public equity investors value an experimental bet that reports no financials of its own?
-        </h3>
-        <div class="poll-options-container grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-          <button class="poll-option-btn p-3.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-orange-500 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 transition-all flex items-center justify-between" data-option="1">
-            <span>Apply a conglomerate discount until disclosure improves</span>
-            <i data-lucide="check" class="w-4 h-4 text-orange-500 hidden vote-check"></i>
-          </button>
-          <button class="poll-option-btn p-3.5 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-orange-500 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 transition-all flex items-center justify-between" data-option="2">
-            <span>Reward management for proactively disrupting their own cash cow</span>
-            <i data-lucide="check" class="w-4 h-4 text-orange-500 hidden vote-check"></i>
-          </button>
-        </div>
-
-        <div class="poll-results hidden space-y-3 pt-3 border-t border-gray-100 dark:border-gray-700 text-xs">
-          <div>
-            <div class="flex justify-between font-bold mb-1">
-              <span>Conglomerate Discount</span>
-              <span class="text-orange-600 font-mono">53%</span>
-            </div>
-            <div class="h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-              <div class="poll-bar-fill h-full bg-orange-500 transition-all duration-700" data-target-pct="53" style="width: 0%"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between font-bold mb-1">
-              <span>Reward Proactive Innovation</span>
-              <span class="text-gray-400 font-mono">47%</span>
-            </div>
-            <div class="h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-              <div class="poll-bar-fill h-full bg-gray-400 transition-all duration-700" data-target-pct="47" style="width: 0%"></div>
-            </div>
-          </div>
-        </div>
-
-        <button class="toggle-verdict-btn mt-4 text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1">
-          <i data-lucide="chevron-down" class="w-4 h-4"></i> View Analyst Verdict & Case Takeaway
-        </button>
-        <div class="poll-verdict hidden mt-3 p-4 rounded-2xl bg-orange-50 dark:bg-orange-950/40 text-xs text-orange-950 dark:text-orange-200 leading-relaxed border border-orange-200 dark:border-orange-800">
-          <strong>Analyst Verdict:</strong> Stock markets naturally penalize opacity. The 5.3% intraday drop in Swiggy's share price post-Q1 FY27 results proves that until Toing's contribution economics are disclosed, analysts will treat it as a risk rather than an asset.
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- =========================================================================
-       15. Section 13: Verified Sources & Citations
-       ========================================================================= -->
-  <section id="sources" class="py-16 bg-white dark:bg-gray-900/60 border-t border-gray-200 dark:border-gray-800">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="mb-8">
-        <span class="swiggy-tag bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 mb-3">
-          <i data-lucide="bookmark" class="w-3.5 h-3.5"></i> Bibliography
-        </span>
-        <h2 class="text-3xl font-extrabold text-gray-950 dark:text-white font-brand tracking-tight mb-2">
-          Sources & Data Notes
-        </h2>
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          All figures are from public shareholder disclosures, regulatory stock exchange filings, and financial reporting outlets up to Swiggy's Q1 FY27 results (quarter ended 30 June 2026):
-        </p>
-      </div>
-
-      <!-- Sources 2-Column Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-medium">
-        <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 flex items-center justify-between hover:border-orange-400 transition-colors">
-          <span class="text-gray-800 dark:text-gray-200 font-semibold">YourStory: Swiggy Q1 FY27 results & Instamart break-even</span>
-          <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
-        </div>
-        <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 flex items-center justify-between hover:border-orange-400 transition-colors">
-          <span class="text-gray-800 dark:text-gray-200 font-semibold">Angel One: Q1 FY27 segment results analysis</span>
-          <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
-        </div>
-        <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 flex items-center justify-between hover:border-orange-400 transition-colors">
-          <span class="text-gray-800 dark:text-gray-200 font-semibold">Sahi: Q1 FY27 margins & EBITDA trajectory</span>
-          <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
-        </div>
-        <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 flex items-center justify-between hover:border-orange-400 transition-colors">
-          <span class="text-gray-800 dark:text-gray-200 font-semibold">IIFL: Food delivery GOV and Toing's 50-city footprint</span>
-          <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
-        </div>
-        <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 flex items-center justify-between hover:border-orange-400 transition-colors">
-          <span class="text-gray-800 dark:text-gray-200 font-semibold">Upstox: Share price reaction & brokerage target revisions</span>
-          <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
-        </div>
-        <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 flex items-center justify-between hover:border-orange-400 transition-colors">
-          <span class="text-gray-800 dark:text-gray-200 font-semibold">MediaNama: Toing launch architecture & fee structure</span>
-          <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
-        </div>
-        <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 flex items-center justify-between hover:border-orange-400 transition-colors">
-          <span class="text-gray-800 dark:text-gray-200 font-semibold">Franchise India: Toing and Main-App Pune price test</span>
-          <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
-        </div>
-        <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 flex items-center justify-between hover:border-orange-400 transition-colors">
-          <span class="text-gray-800 dark:text-gray-200 font-semibold">Storyboard18: Toing launch in Pune & brand strategy</span>
-          <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
-        </div>
-        <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 flex items-center justify-between hover:border-orange-400 transition-colors">
-          <span class="text-gray-800 dark:text-gray-200 font-semibold">Inc42: Toing debut and food delivery plateau analysis</span>
-          <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
-        </div>
-        <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 flex items-center justify-between hover:border-orange-400 transition-colors">
-          <span class="text-gray-800 dark:text-gray-200 font-semibold">Business Today: Interview with Rohit Kapoor on Affordability</span>
-          <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
-        </div>
-        <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 flex items-center justify-between hover:border-orange-400 transition-colors">
-          <span class="text-gray-800 dark:text-gray-200 font-semibold">Restaurant India: Toing national brand film campaign</span>
-          <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
-        </div>
-        <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 flex items-center justify-between hover:border-orange-400 transition-colors">
-          <span class="text-gray-800 dark:text-gray-200 font-semibold">Tradejini: Ownly pricing and Bolt & Snacc order shares</span>
-          <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
-        </div>
-        <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 flex items-center justify-between hover:border-orange-400 transition-colors">
-          <span class="text-gray-800 dark:text-gray-200 font-semibold">Outlook Business: Ownly pilot and the ₹99 in-app store</span>
-          <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
-        </div>
-        <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 flex items-center justify-between hover:border-orange-400 transition-colors">
-          <span class="text-gray-800 dark:text-gray-200 font-semibold">CB Insights: Rapido and the unit economics of low-value delivery</span>
-          <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
-        </div>
-        <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 flex items-center justify-between hover:border-orange-400 transition-colors">
-          <span class="text-gray-800 dark:text-gray-200 font-semibold">Reuters Breakingviews: India's food delivery duopoly take rates</span>
-          <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
-        </div>
-        <div class="p-3.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 flex items-center justify-between hover:border-orange-400 transition-colors">
-          <span class="text-gray-800 dark:text-gray-200 font-semibold">Lapaas Voice: Eternal CEO on Bistro & low-tier impact</span>
-          <i data-lucide="external-link" class="w-3.5 h-3.5 text-gray-400 shrink-0"></i>
-        </div>
-      </div>
-      <div class="mt-6 text-center text-xs text-gray-400">
-        This document represents an independent academic and strategic case analysis. It does not constitute investment advice.
-      </div>
-    </div>
-  </section>
-
-  <!-- =========================================================================
-       16. Quick Search Modal (Ctrl + K)
-       ========================================================================= -->
-  <div id="search-modal" class="fixed inset-0 z-50 bg-black/60 modal-backdrop hidden flex items-start justify-center pt-20 px-4">
-    <div class="bg-white dark:bg-gray-900 w-full max-w-xl rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden transform transition-all">
-      <div class="p-4 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3">
-        <i data-lucide="search" class="w-5 h-5 text-orange-500"></i>
-        <input type="text" id="search-input" placeholder="Search case study topics (e.g., Pune, Meituan, Rapido, EBITDA, Rohit Kapoor)..." class="w-full bg-transparent text-sm focus:outline-none text-gray-900 dark:text-white placeholder-gray-400">
-        <button id="close-search-btn" class="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-      <div id="search-results" class="p-3 max-h-80 overflow-y-auto space-y-1">
-        <!-- Injected via JavaScript -->
-      </div>
-      <div class="px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800 text-[11px] text-gray-400 flex justify-between">
-        <span>Use <kbd class="font-mono bg-white dark:bg-gray-700 px-1 py-0.5 rounded border border-gray-200 dark:border-gray-600">Esc</kbd> to exit</span>
-        <span>Swiggy Case Study Explorer</span>
+      <!-- Scope Note Callout Box (from PDF) -->
+      <div class="caveat reveal mt-6 p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 leading-relaxed">
+        <strong>Scope Note:</strong> Swiggy does not report Toing as its own financial line. It sits inside a segment titled <strong>"Platform Innovations"</strong> alongside <em>Swiggy Minis, Swiggy Sports, Snacc, and Crew</em> (which earned <strong>₹51 crore of revenue in Q1 FY27</strong>). Profitability figures are strategic inferences based on public reporting and unit economic math.
       </div>
     </div>
   </div>
+</section>
 
-  <!-- =========================================================================
-       17. Footer
-       ========================================================================= -->
-  <footer class="bg-gray-950 text-white py-12 border-t border-gray-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center font-bold text-white">T</div>
-        <div>
-          <div class="font-bold text-sm font-brand tracking-wide">Toing by Swiggy • Case Study 2026</div>
-          <p class="text-xs text-gray-400">Prepared 4 October 2026 | Powered by Swiggy Design Tokens & Analytics</p>
+<!-- =========================================================
+     3. COMPETITIVE TEARDOWN (Orange Panel, Horizontal Scroll)
+     ========================================================= -->
+<section class="panel orange no-clip" id="market">
+  <div class="slab">
+    <div class="hz-outer" id="hzouter">
+      <div class="hz-inner">
+        <div class="market-head">
+          <div class="s-kicker reveal">
+            <span class="idx">02</span>
+            <span class="nm">Market Dynamics · Competitive Matrix</span>
+            <span class="ln"></span>
+          </div>
+          <div class="reveal"><span class="eyebrow">Horizontal Teardown</span></div>
+          <h2 class="head reveal">Rivals for India's <span class="hl">₹99 Food Tray.</span></h2>
+          <p class="lede reveal">
+            Toing is not alone. Challengers enter with radically different starting points, logistics assets, and capital patience. <span style="opacity:0.8;">Scroll down to slide cards horizontally →</span>
+          </p>
+        </div>
+
+        <div class="hz-viewport">
+          <div id="hztrack">
+            
+            <!-- Card 1: Toing (Swiggy) -->
+            <article class="comp-card" style="--cc:#FC8019">
+              <div class="logo">Toing (Swiggy)</div>
+              <div class="verdict">Standalone Budget Play · Incumbent Asset</div>
+              <div class="big">50 Cities<small>Scaled from Pune pilot; 66% new-to-online cohort</small></div>
+              <ul>
+                <li><span class="tk">₹12</span>Flat platform fee; zero restaurant packaging charges</li>
+                <li><span class="tk">Fleet</span>Cross-uses idle riders from Bolt, Snacc &amp; Instamart</li>
+                <li><span class="tk">2/3</span>New users are first-time online food delivery consumers</li>
+                <li><span class="tk">✕</span>Shares cost base with loss-making parent; cannibalization risk</li>
+              </ul>
+              <div class="gap"><b>Strategic Moat:</b> Existing relationships with 200,000+ restaurants and shared 400k+ rider mesh.</div>
+              <div class="comp-idx">01</div>
+            </article>
+
+            <!-- Card 2: Rapido Ownly -->
+            <article class="comp-card" style="--cc:#FFB300">
+              <div class="logo">Ownly (Rapido)</div>
+              <div class="verdict">Logistics Disrupter · Bike-Taxi Flywheel</div>
+              <div class="big">0% Comm.<small>Zero restaurant commission; flat ₹25 delivery fee</small></div>
+              <ul>
+                <li><span class="tk">₹25</span>Flat delivery under ₹400; ₹50 above ₹400</li>
+                <li><span class="tk">Dual</span>Captains switch between passenger rides and food delivery</li>
+                <li><span class="tk">10%</span>Bengaluru food delivery market share captured quickly</li>
+                <li><span class="tk">✕</span>Smaller catalogue outside South India; no dark stores</li>
+              </ul>
+              <div class="gap"><b>The Paradox:</b> Swiggy was an early investor in Rapido, and Prosus owns equity in both!</div>
+              <div class="comp-idx">02</div>
+            </article>
+
+            <!-- Card 3: Eternal Bistro (Zomato) -->
+            <article class="comp-card" style="--cc:#E23744">
+              <div class="logo">Bistro (Eternal)</div>
+              <div class="verdict">Mid-Market Quick · Automated Kitchens</div>
+              <div class="big">$1.5B+ Cash<small>Zomato/Eternal cash reserves backing rapid automation</small></div>
+              <ul>
+                <li><span class="tk">Speed</span>15-min dispatch via streamlined pre-prepped menus</li>
+                <li><span class="tk">Fleet</span>Leverages massive core Zomato delivery network</li>
+                <li><span class="tk">Price</span>Positioned slightly above the true ₹99 budget tier</li>
+                <li><span class="tk">✕</span>Eternal CEO claims Toing and Ownly have had limited impact</li>
+              </ul>
+              <div class="gap"><b>Positioning:</b> Defends the ₹150–₹250 quick meal tier rather than sub-₹99 street food.</div>
+              <div class="comp-idx">03</div>
+            </article>
+
+            <!-- Card 4: Swiggy Core App -->
+            <article class="comp-card" style="--cc:#FC8019">
+              <div class="logo">Swiggy Core</div>
+              <div class="verdict">The High-Take Cash Cow</div>
+              <div class="big">₹9,490 Cr<small>Q1 FY27 GOV; ₹202 Cr profit engine funding Instamart</small></div>
+              <ul>
+                <li><span class="tk">₹14</span>Platform fee hiked repeatedly from ₹2 to protect EBITDA</li>
+                <li><span class="tk">25%</span>Average restaurant commission take-rate</li>
+                <li><span class="tk">12%</span>Volume share from rapid formats (Bolt 10-min &amp; Snacc)</li>
+                <li><span class="tk">✕</span>Metro order frequency plateaued; vulnerable to fee revolt</li>
+              </ul>
+              <div class="gap"><b>The Vulnerability:</b> Reuters notes Indian platform take rates exceed Meituan's in China.</div>
+              <div class="comp-idx">04</div>
+            </article>
+
+            <!-- Card 5: Flipkart & ONDC -->
+            <article class="comp-card" style="--cc:#2E6FD4">
+              <div class="logo">Flipkart (ONDC)</div>
+              <div class="verdict">Open Protocol · Massive E-Commerce Base</div>
+              <div class="big">500M+ Users<small>Open network food ordering pilots in Bengaluru</small></div>
+              <ul>
+                <li><span class="tk">Open</span>Government-backed unbundled seller/buyer protocol</li>
+                <li><span class="tk">Take</span>Zero or near-zero platform commission to sellers</li>
+                <li><span class="tk">Backing</span>Deep Walmart/Flipkart balance sheet</li>
+                <li><span class="tk">✕</span>Inconsistent customer service SLAs; unproven scale</li>
+              </ul>
+              <div class="gap"><b>Future Threat:</b> If ONDC delivery fleets standardize, take-rates across all platforms compress.</div>
+              <div class="comp-idx">05</div>
+            </article>
+
+          </div>
+        </div>
+
+        <div class="hz-hint">
+          <span>Scroll to advance teardown</span>
+          <span class="bar"><i id="hzbar"></i></span>
         </div>
       </div>
-      <div class="flex items-center gap-6 text-xs text-gray-400">
-        <a href="#hero" class="hover:text-orange-500 transition-colors flex items-center gap-1">
-          <i data-lucide="arrow-up" class="w-3.5 h-3.5"></i> Back to Top
-        </a>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     4. DIAGNOSIS & ROOT CAUSE ANALYSIS (White Panel)
+     ========================================================= -->
+<section class="panel white" id="diagnosis">
+  <div class="slab" data-dir="left">
+    <div class="wrap">
+      <div class="s-kicker reveal">
+        <span class="idx">03</span>
+        <span class="nm">Diagnosis · Root Cause Analysis</span>
+        <span class="ln"></span>
+      </div>
+
+      <div class="reveal"><span class="eyebrow">Funnel Leaks · Structural Diagnosis</span></div>
+      <h2 class="head reveal">Why did core food delivery<br><span class="hl">hit a growth ceiling?</span></h2>
+      <p class="lede reveal">
+        In Q1 FY27, Swiggy food delivery GOV growth slightly missed consensus estimates and trailed Zomato. Before building sub-brands, every PM must answer: was stagnation caused by <b>market saturation</b>, <b>fee fatigue</b>, or an <b>unsolvable logistics cost floor</b>?
+      </p>
+
+      <!-- Funnel Diagnostic Rail -->
+      <div class="dx-h reveal">Where the food delivery funnel actually leaks <span class="tag">Funnel Diagnosis</span></div>
+      <div class="dx-funnel reveal">
+        <div class="dx-stage" style="--c:#E8920C">
+          <div class="dn"><span class="dot"></span>1. Hunger Intent</div>
+          <div class="dvd">Vast (Daily)</div>
+          <div class="dd">Hundreds of millions of Indians eat lunch outside the home daily. No shortage of aggregate demand.</div>
+        </div>
+        <div class="dx-arrow">→</div>
+        <div class="dx-stage" style="--c:#2E6FD4">
+          <div class="dn"><span class="dot"></span>2. App Browse</div>
+          <div class="dvd">High Penetration</div>
+          <div class="dd">Users open Swiggy or Zomato to browse local restaurants, ratings, and menu items.</div>
+        </div>
+        <div class="dx-arrow">→</div>
+        <div class="dx-stage leak" style="--c:#E23744">
+          <div class="dn"><span class="dot"></span>3. Cart Checkout</div>
+          <div class="dvd">Severe Leak</div>
+          <div class="dd">Meal ₹99 + Platform ₹14.99 + Packaging ₹19 + Delivery ₹35 = ₹168+. User abandons cart in disgust.</div>
+        </div>
+        <div class="dx-arrow">→</div>
+        <div class="dx-stage leak" style="--c:#C0182A">
+          <div class="dn"><span class="dot"></span>4. Habit Formation</div>
+          <div class="dvd">Frequency Ceiling</div>
+          <div class="dd">Ordering stays an occasional weekend splurge (1-2x/month) rather than daily lunch habit.</div>
+        </div>
+      </div>
+
+      <div class="dx-verdict reveal mt-4 p-4 rounded-xl bg-orange-50 border-l-4 border-orange-500 text-xs text-orange-950 leading-relaxed">
+        <strong>The Diagnosis:</strong> High platform fees created an insurmountable psychological barrier. You cannot market or discount your way past a 55% checkout surcharge on daily meals.
+      </div>
+
+      <!-- Three Hypotheses Cards -->
+      <div class="dx-h reveal mt-8">Three Strategic Hypotheses <span class="tag">Validation</span></div>
+      <div class="dx-hyps reveal grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="dx-hyp p-5 rounded-2xl bg-white border border-gray-200 shadow-sm">
+          <div class="hq font-bold text-gray-900 text-base">Is it an advertising problem?</div>
+          <span class="hbadge rej inline-block text-[10px] font-bold uppercase px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 my-2">✕ Rejected</span>
+          <div class="hd text-xs text-gray-600 leading-relaxed">Both Swiggy and Zomato have near 100% brand recall in tier-1/2 cities. More brand spend only acquired users who churned after the first order.</div>
+        </div>
+
+        <div class="dx-hyp p-5 rounded-2xl bg-white border border-gray-200 shadow-sm">
+          <div class="hq font-bold text-gray-900 text-base">Is it a restaurant selection issue?</div>
+          <span class="hbadge part inline-block text-[10px] font-bold uppercase px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 my-2">~ Partly</span>
+          <div class="hd text-xs text-gray-600 leading-relaxed">Local dhabas and pocket-friendly darshinis were absent because 25% commissions wiped out their razor-thin margins.</div>
+        </div>
+
+        <div class="dx-hyp win p-5 rounded-2xl bg-white border-2 border-orange-500 shadow-md">
+          <div class="hq font-bold text-gray-900 text-base">Is it fee compounding?</div>
+          <span class="hbadge conf inline-block text-[10px] font-bold uppercase px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 my-2">✓ Confirmed Root</span>
+          <div class="hd text-xs text-gray-600 leading-relaxed">When extras equal 50–90% of the food price, value perception collapses. Toing strips extras to attack this exact root cause.</div>
+        </div>
       </div>
     </div>
-  </footer>
+  </div>
+</section>
 
-  <!-- App Script -->
-  <script src="app.js"></script>
+<!-- =========================================================
+     5. THE SOLUTION & INTERACTIVE DEVICE MOCKUP (White Panel)
+     ========================================================= -->
+<section class="panel white" id="journey">
+  <div class="slab" data-dir="right">
+    <div class="wrap">
+      <div class="s-kicker reveal">
+        <span class="idx">04</span>
+        <span class="nm">Solution Design · Standalone Architecture</span>
+        <span class="ln"></span>
+      </div>
+
+      <div class="reveal"><span class="eyebrow">Product Mechanics · Realistic Device Mockup</span></div>
+      <h2 class="head reveal">Why a standalone app<br>beats an <span class="hl">in-app budget tab.</span></h2>
+      <p class="lede reveal">
+        Swiggy deliberately chose an independent app over a tab inside the flagship app. A budget tab would have triggered immediate cannibalization, causing 20 million affluent users to demand zero platform fees and eroding ₹202 Cr in quarterly food delivery profits.
+      </p>
+
+      <!-- Old Way vs Proposed Way -->
+      <div class="compare mt-8">
+        <div class="way old reveal stg">
+          <span class="tag">✕ The Swiggy Main App Dilemma</span>
+          <h3>Compounding fee stack</h3>
+          <ol class="steps">
+            <li>Customer selects ₹99 veg thali</li>
+            <li>Restaurant packaging charge added (+₹19)</li>
+            <li>Mandatory platform fee applied (+₹14.99)</li>
+            <li>Delivery partner fee (+₹35)</li>
+            <li>Surge/Rain fee applied during peak (+₹25)</li>
+            <li>Checkout hits ₹193 — user uninstalls or walks to the dhaba</li>
+          </ol>
+          <div class="foot">High price friction · 55% markup over kitchen price</div>
+        </div>
+
+        <div class="way new reveal stg" data-delay="1">
+          <span class="tag">✓ The Toing Standalone Architecture</span>
+          <h3>Strips out junk fees entirely</h3>
+          <ol class="steps">
+            <li>Curated catalog strictly under ₹99</li>
+            <li>Zero packaging charge negotiated upfront</li>
+            <li>Flat ₹12 platform fee; free delivery over ₹99</li>
+            <li>No surge pricing or rain surcharges</li>
+            <li>Checkout stays locked at ₹124</li>
+            <li>Riders cross-routed from idle Instamart/Bolt hours</li>
+          </ol>
+          <div class="foot">Transparent pricing · 66% first-time customer acquisition</div>
+        </div>
+      </div>
+
+      <!-- Device Mockup: Interactive Toing Experience -->
+      <div class="wire-grid mt-12">
+        <div class="reveal stg">
+          <div class="wf-label">Toing App Interface · Budget Checkout SLA</div>
+          <div class="device">
+            <div class="notch"></div>
+            <div class="scr">
+              <div class="app-status">
+                <span class="time">1:15</span>
+                <span class="ind">●●● 5G 98%</span>
+              </div>
+              <div class="app-top">
+                <div class="loc">
+                  <b>toing</b>
+                  <span>Pune Camp · 30-min guarantee</span>
+                </div>
+                <div class="live">ZERO PACKAGING</div>
+              </div>
+              <div class="app-body">
+                <div class="searchbar">
+                  <span class="mag"></span> Search meals under ₹99...
+                </div>
+                <div class="mrow" style="--c:#FC8019">
+                  <div>
+                    <div class="who">Egg Fried Rice Combo</div>
+                    <div class="it">Anna's Kitchen · Fast Prep</div>
+                  </div>
+                  <div class="pr">₹89</div>
+                </div>
+                <div class="mrow" style="--c:#60B244">
+                  <div>
+                    <div class="who">Special Mini Thali</div>
+                    <div class="it">3 Rotis, Dal, Sabzi</div>
+                  </div>
+                  <div class="pr">₹99</div>
+                </div>
+                <div class="gtot">
+                  <div class="l">Total (Platform fee ₹12 included)</div>
+                  <div class="v">₹124</div>
+                </div>
+                <button class="app-cta go">Place Order · Zero Hidden Fees</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Four Mechanics of Toing -->
+        <div class="reveal stg" data-delay="1">
+          <div class="wf-label">The Four Operational Pillars</div>
+          <div class="space-y-3 w-full">
+            <div class="p-4 rounded-xl bg-orange-50/60 border border-orange-200">
+              <h4 class="font-bold text-sm text-gray-900 flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg bg-orange-500 text-white flex items-center justify-center text-xs">1</span>
+                Interleaved Fleet Routing
+              </h4>
+              <p class="text-xs text-gray-600 mt-1">Routing riders between morning grocery peaks on Instamart, afternoon budget lunches on Toing, and evening quick deliveries on Bolt.</p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-orange-50/60 border border-orange-200">
+              <h4 class="font-bold text-sm text-gray-900 flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg bg-orange-500 text-white flex items-center justify-center text-xs">2</span>
+                Zero Packaging Guarantee
+              </h4>
+              <p class="text-xs text-gray-600 mt-1">Standardized bio-degradable meal box bulk procurement provided directly by Swiggy, removing merchant markups.</p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-orange-50/60 border border-orange-200">
+              <h4 class="font-bold text-sm text-gray-900 flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg bg-orange-500 text-white flex items-center justify-center text-xs">3</span>
+                Hyper-Local Density Batching
+              </h4>
+              <p class="text-xs text-gray-600 mt-1">Clustering delivery orders in student hubs (Symbiosis, Viman Nagar) so one rider delivers 2-3 orders per trip.</p>
+            </div>
+
+            <div class="p-4 rounded-xl bg-orange-50/60 border border-orange-200">
+              <h4 class="font-bold text-sm text-gray-900 flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg bg-orange-500 text-white flex items-center justify-center text-xs">4</span>
+                Merchant Sponsored Ads
+              </h4>
+              <p class="text-xs text-gray-600 mt-1">Monetizing top-of-feed placement to replace high commission take-rates with voluntary advertising auctions.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     6. PRIORITIZATION (RICE Matrix & 3D Quadrant)
+     ========================================================= -->
+<section class="panel orange" id="priority">
+  <div class="slab" data-dir="left">
+    <div class="wrap">
+      <div class="s-kicker reveal">
+        <span class="idx">05</span>
+        <span class="nm">Prioritization · Strategic Trade-Offs</span>
+        <span class="ln"></span>
+      </div>
+
+      <div class="reveal"><span class="eyebrow">RICE · 3D Impact vs. Effort</span></div>
+      <h2 class="head reveal">Defending the <span class="hl">MVP Scope.</span></h2>
+      <p class="lede reveal">
+        Low-order delivery carries enormous financial risk. Swiggy prioritized features that attack the cost floor first while deferring complex multi-restaurant bundling. <b>Hover the 3D stage bubbles below:</b>
+      </p>
+
+      <div class="quad-wrap">
+        <!-- 3D Interactive Quadrant -->
+        <div class="card reveal quad-card">
+          <div class="quad3d">
+            <div class="quad-stage" id="quadStage">
+              <div class="quad-plane">
+                <span class="quad-grid-l v"></span>
+                <span class="quad-grid-l h"></span>
+                <span class="qax x">Effort →</span>
+                <span class="qax y">Impact →</span>
+                <span class="qlab" style="left:7%;top:5%">Quick Wins</span>
+                <span class="qlab" style="right:7%;top:5%">Big Bets</span>
+                <span class="qlab" style="left:7%;bottom:6%">Low Priority</span>
+                <span class="qlab" style="right:7%;bottom:6%">Money Pit</span>
+
+                <div class="qpoint" style="left:34%;top:20%">
+                  <div class="qbub" style="--sz:62px;background:linear-gradient(135deg,#FF9036,#DE5A00)">Toing</div>
+                  <div class="qnm">Zero-Fee App</div>
+                  <div class="qtip"><b>RICE 9.4 · v1</b> Standalone brand protecting core margins</div>
+                </div>
+                <div class="qpoint" style="left:26%;top:38%">
+                  <div class="qbub" style="--sz:48px;background:linear-gradient(135deg,#60B244,#3D8224)">Fleet</div>
+                  <div class="qnm">Cross-Fleet</div>
+                  <div class="qtip"><b>RICE 8.6 · v1</b> Interleaving with Instamart/Bolt idle capacity</div>
+                </div>
+                <div class="qpoint" style="left:60%;top:32%">
+                  <div class="qbub" style="--sz:50px;background:linear-gradient(135deg,#2E6FD4,#1A4FA0)">Ads</div>
+                  <div class="qnm">Merchant Ads</div>
+                  <div class="qtip"><b>RICE 7.1 · Stage 2</b> High-margin sponsored ad auctions</div>
+                </div>
+                <div class="qpoint" style="left:38%;top:58%">
+                  <div class="qbub" style="--sz:44px;background:linear-gradient(135deg,#E8920C,#B5700A)">Batch</div>
+                  <div class="qnm">Clustering</div>
+                  <div class="qtip"><b>RICE 6.2 · Stage 2</b> 2-3 drops per rider in dense office hubs</div>
+                </div>
+                <div class="qpoint" style="left:75%;top:60%">
+                  <div class="qbub" style="--sz:42px;background:linear-gradient(135deg,#8A4DE6,#5E2EAD)">Gates</div>
+                  <div class="qnm">Profit Gates</div>
+                  <div class="qtip"><b>RICE 5.4 · Stage 3</b> Cohort contribution margin discipline</div>
+                </div>
+                <div class="qpoint" style="left:84%;top:82%">
+                  <div class="qbub" style="--sz:38px;background:linear-gradient(135deg,#B8A8A0,#8A7870)">Multi</div>
+                  <div class="qnm">Multi-Kitchen</div>
+                  <div class="qtip"><b>RICE 2.4 · Defer</b> Compounds prep-time, packaging &amp; SLAs</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RICE Table -->
+        <div class="reveal">
+          <div class="rice">
+            <div class="rice-head">
+              <span>#</span>
+              <span>Feature / Initiative · RICE Score</span>
+              <span class="rh-end">Call</span>
+            </div>
+            <div class="rice-row win">
+              <span class="rk">1</span>
+              <div class="ft">
+                <b>Standalone Zero-Fee App</b>
+                <div class="barwrap"><span class="bar" style="width:96px"></span><span class="sc">9.4</span></div>
+              </div>
+              <span class="call v1">v1 MVP</span>
+            </div>
+            <div class="rice-row">
+              <span class="rk">2</span>
+              <div class="ft">
+                <b>Cross-Fleet Interleaving</b>
+                <div class="barwrap"><span class="bar" style="width:86px"></span><span class="sc">8.6</span></div>
+              </div>
+              <span class="call v1">v1 MVP</span>
+            </div>
+            <div class="rice-row">
+              <span class="rk">3</span>
+              <div class="ft">
+                <b>Merchant Sponsored Ads</b>
+                <div class="barwrap"><span class="bar" style="width:71px"></span><span class="sc">7.1</span></div>
+              </div>
+              <span class="call s2">Stage 2</span>
+            </div>
+            <div class="rice-row">
+              <span class="rk">4</span>
+              <div class="ft">
+                <b>Hyper-Local Order Batching</b>
+                <div class="barwrap"><span class="bar" style="width:62px"></span><span class="sc">6.2</span></div>
+              </div>
+              <span class="call s2">Stage 2</span>
+            </div>
+            <div class="rice-row">
+              <span class="rk">5</span>
+              <div class="ft">
+                <b>Profit-Gated Expansion</b>
+                <div class="barwrap"><span class="bar" style="width:54px"></span><span class="sc">5.4</span></div>
+              </div>
+              <span class="call s3">Stage 3</span>
+            </div>
+            <div class="rice-row">
+              <span class="rk">6</span>
+              <div class="ft">
+                <b>Multi-Kitchen Bundling</b>
+                <div class="barwrap"><span class="bar" style="width:24px"></span><span class="sc">2.4</span></div>
+              </div>
+              <span class="call no">Defer</span>
+            </div>
+          </div>
+
+          <div class="mt-4 p-4 rounded-xl bg-black/20 border border-white/20 text-xs text-white/90 leading-relaxed">
+            <strong>Key Takeaway:</strong> The standalone app and cross-fleet interleaving dominate because they protect Swiggy's existing ₹9,490 Cr food delivery core while attacking the marginal cost per drop.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     7. THE BUSINESS CASE & LIVE ECONOMIC SIMULATOR (Deep Orange Panel)
+     ========================================================= -->
+<section class="panel orange deep" id="business">
+  <div class="slab" data-dir="right">
+    <div class="wrap">
+      <div class="s-kicker reveal">
+        <span class="idx">06</span>
+        <span class="nm">Viability · The Business Case</span>
+        <span class="ln"></span>
+      </div>
+
+      <div class="reveal"><span class="eyebrow">Q1 FY27 Disclosures · Live Rupee Model</span></div>
+      <h2 class="head reveal">The Brutal Math of the <span class="hl">₹99 Meal.</span></h2>
+      <p class="lede reveal">
+        On a ₹700 feast order, a ₹40 rider payout is ~6% of transaction value. On a ₹99 Toing order, that same ₹40 payout exceeds 40% of the entire bill. Move the sliders below to stress-test how rider batching, ad monetization, and order basket sizes flip the economics into the black.
+      </p>
+
+      <!-- Three Strategic Lenses -->
+      <div class="biz-lenses reveal">
+        <div class="biz-lens">
+          <div class="ll">Lens 01</div>
+          <div class="lt">Desirability</div>
+          <div class="ld">Proven demand: 66% of new users are first-time online eaters; 50 cities scaled.</div>
+        </div>
+        <div class="biz-lens">
+          <div class="ll">Lens 02</div>
+          <div class="lt">Feasibility</div>
+          <div class="ld">Shared rider fleet cross-utilizing idle capacity between Instamart grocery morning peaks.</div>
+        </div>
+        <div class="biz-lens on">
+          <div class="ll">Lens 03</div>
+          <div class="lt">Viability</div>
+          <div class="ld">Can a ₹99 order generate positive contribution margin? Move the levers below.</div>
+        </div>
+      </div>
+
+      <!-- Live Interactive Financial Simulator -->
+      <div class="biz-model reveal mt-8">
+        <div class="bm-out">
+          <div class="ol">Net Contribution Margin / Order</div>
+          <div class="bm-big">₹<span id="bmMargin">+8.50</span><span class="u">/ drop</span></div>
+          <div class="bm-sec">
+            <div class="si"><div class="sv">₹<span id="bmPlatformRev">26.85</span></div><div class="sk">Total Platform Take</div></div>
+            <div class="si"><div class="sv">₹<span id="bmDeliveryCost">18.35</span></div><div class="sk">Effective Delivery Cost</div></div>
+            <div class="si"><div class="sv"><span id="bmTakeRate">24.6</span>%</div><div class="sk">Blended Platform Take</div></div>
+          </div>
+          <div class="bm-bar">
+            <div class="bl"><span>Annualized 50-City Contribution</span><span>Run-Rate ₹ Cr</span></div>
+            <div class="bm-track"><div class="bm-fill" id="bmFill" style="width: 45%;"></div></div>
+          </div>
+        </div>
+
+        <div class="bm-in">
+          <div class="bm-slab">
+            <div class="flex justify-between items-baseline mb-1">
+              <span class="font-bold text-xs text-gray-900 font-brand">Average Order Value (AOV)</span>
+              <span class="font-mono font-bold text-orange-600 text-sm" id="vAov">₹109</span>
+            </div>
+            <input type="range" class="biz-range" id="sAov" min="79" max="180" step="5" value="109">
+          </div>
+
+          <div class="bm-slab">
+            <div class="flex justify-between items-baseline mb-1">
+              <span class="font-bold text-xs text-gray-900 font-brand">Rider Batching Efficiency <small class="text-gray-400 font-normal">(drops / trip)</small></span>
+              <span class="font-mono font-bold text-orange-600 text-sm" id="vBatch">1.8 drops</span>
+            </div>
+            <input type="range" class="biz-range" id="sBatch" min="1.0" max="2.8" step="0.1" value="1.8">
+          </div>
+
+          <div class="bm-slab">
+            <div class="flex justify-between items-baseline mb-1">
+              <span class="font-bold text-xs text-gray-900 font-brand">Merchant Ad &amp; Promo Take Rate</span>
+              <span class="font-mono font-bold text-orange-600 text-sm" id="vAds">14%</span>
+            </div>
+            <input type="range" class="biz-range" id="sAds" min="8" max="22" step="1" value="14">
+          </div>
+
+          <div class="flex justify-between items-center pt-2">
+            <span class="text-[11px] text-gray-500 font-mono">Formula: (AOV × Take%) + ₹12 Fee − (₹33 / Batch)</span>
+            <button class="px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-bold hover:bg-orange-200 transition-colors" id="bmReset">Reset Base</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Three Scenarios -->
+      <div class="biz-scn reveal mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="scn p-5 rounded-2xl bg-white text-gray-900 border border-orange-200 shadow-sm">
+          <div class="st text-xs uppercase font-bold text-gray-400 font-mono">Conservative</div>
+          <div class="sgmv text-2xl font-black text-red-600 font-brand mt-1">-₹8.20 / drop</div>
+          <div class="spct text-xs text-gray-500 mt-1">Single-order drops · Zero ad take</div>
+          <div class="srev mt-3 pt-3 border-t text-xs text-gray-700">Annualized Burn: <b>-₹120 Cr</b> / yr</div>
+        </div>
+
+        <div class="scn base p-5 rounded-2xl bg-white text-gray-900 border-2 border-orange-500 shadow-lg">
+          <div class="st text-xs uppercase font-bold text-orange-600 font-mono">Base Case (Current Q1 FY27)</div>
+          <div class="sgmv text-2xl font-black text-emerald-600 font-brand mt-1">+₹8.50 / drop</div>
+          <div class="spct text-xs text-gray-500 mt-1">1.8x batching · 14% ad take</div>
+          <div class="srev mt-3 pt-3 border-t text-xs text-gray-700">Net Contribution: <b>+₹62 Cr</b> / yr</div>
+        </div>
+
+        <div class="scn p-5 rounded-2xl bg-white text-gray-900 border border-orange-200 shadow-sm">
+          <div class="st text-xs uppercase font-bold text-gray-400 font-mono">Aggressive Scale</div>
+          <div class="sgmv text-2xl font-black text-emerald-700 font-brand mt-1">+₹21.40 / drop</div>
+          <div class="spct text-xs text-gray-500 mt-1">2.4x cluster batching · 18% ad take</div>
+          <div class="srev mt-3 pt-3 border-t text-xs text-gray-700">Net Contribution: <b>+₹240 Cr</b> / yr</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     8. METRICS & 3D CHARTS (White Panel)
+     ========================================================= -->
+<section class="panel white" id="metrics">
+  <div class="slab" data-dir="right">
+    <div class="wrap">
+      <div class="s-kicker reveal">
+        <span class="idx">07</span>
+        <span class="nm">Metrics · North Star · Performance</span>
+        <span class="ln"></span>
+      </div>
+
+      <div class="reveal"><span class="eyebrow">Unit Economics · Funnel Analytics</span></div>
+      <h2 class="head reveal">Instrumenting <span class="hl">cohort viability.</span></h2>
+      <p class="lede reveal">
+        Measuring low-price food delivery requires different KPIs than mainstream apps. Success is defined not by vanity app downloads, but by <b>contribution-positive order density per city cohort</b>.
+      </p>
+
+      <!-- 3D Interactive Charts Grid -->
+      <div class="dash-grid">
+        <!-- 3D Chart 1: Order Value Distribution -->
+        <div class="card chart-card reveal">
+          <h4 class="font-bold text-gray-900">AOV vs. Cost Floor Dynamics</h4>
+          <div class="sub text-xs text-gray-500 mt-1">Comparing ₹99 Toing basket against ₹700 Core Swiggy order economics.</div>
+          <div class="c3d" id="aovBox"><canvas></canvas><div class="c3d-labels"></div><div class="c3d-tip"></div></div>
+        </div>
+
+        <!-- 3D Chart 2: First-Time User Cohort -->
+        <div class="card chart-card reveal">
+          <h4 class="font-bold text-gray-900">Cohort Acquisition Breakdown</h4>
+          <div class="sub text-xs text-gray-500 mt-1">Proof of market expansion: 66% new-to-online vs 34% existing switchers.</div>
+          <div class="c3d" id="kBox"><canvas></canvas><div class="c3d-labels"></div><div class="c3d-tip"></div></div>
+          <div class="donut-legend mt-2 flex gap-4 justify-center text-xs font-semibold">
+            <span style="--c:#FC8019"><i class="inline-block w-3 h-3 rounded mr-1" style="background:#FC8019"></i> First-Time Eaters <b>66%</b></span>
+            <span style="--c:#8C786E"><i class="inline-block w-3 h-3 rounded mr-1" style="background:#8C786E"></i> Swiggy Switchers <b>34%</b></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- North Star Callout Banner -->
+      <div class="northstar reveal mt-8 p-6 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-xl flex items-center gap-6">
+        <div class="ns-ico text-4xl p-3 bg-white/20 rounded-2xl">⭐</div>
+        <div>
+          <div class="ns-k text-xs uppercase font-extrabold tracking-wider text-orange-200">The North Star Metric</div>
+          <div class="ns-v text-2xl font-black font-brand mt-0.5">Contribution-Positive Orders Fired per City per Day</div>
+          <div class="ns-d text-xs text-white/90 mt-1">Captures both customer habituation and the essential logistics cost-discipline needed for sustainable scale.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     9. PHASED ROADMAP (Orange Panel)
+     ========================================================= -->
+<section class="panel orange" id="roadmap">
+  <div class="slab" data-dir="left">
+    <div class="wrap">
+      <div class="s-kicker reveal">
+        <span class="idx">08</span>
+        <span class="nm">Go-To-Market · Phased Roadmap</span>
+        <span class="ln"></span>
+      </div>
+
+      <div class="reveal"><span class="eyebrow">Operational Delivery · GTM</span></div>
+      <h2 class="head reveal">A discipline-first <span class="hl">phased rollout.</span></h2>
+      <p class="lede reveal">
+        Replicating Instamart's turnaround journey (from -4.6% to break-even in May 2026). Each phase is governed by clear financial gates:
+      </p>
+
+      <div class="timeline">
+        <div class="tl-progress"></div>
+
+        <!-- Stage 1 -->
+        <div class="tl-item reveal">
+          <div class="tl-node"></div>
+          <div class="tl-card">
+            <div class="tl-when">Stage 1 · Months 0–6 · Proven Launch</div>
+            <h3 class="text-xl font-bold font-brand text-white">Standalone Budget Foundation (Completed)</h3>
+            <p class="text-sm text-white/80 mt-2 leading-relaxed">
+              Launched Pune pilot with 500 initial downloads; expanded to 1,000+ restaurants with meals under ₹99, zero packaging fees, and flat ₹12 platform fee. Rapidly scaled to 50 cities with 2/3 of users being first-time online food delivery consumers.
+            </p>
+            <div class="tl-bench mt-3 text-xs bg-black/20 p-2.5 rounded-lg border border-white/20">
+              📊 Gate Passed: Reached <b>50 cities</b> &amp; <b>66% first-timer ratio</b>.
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage 2 -->
+        <div class="tl-item reveal">
+          <div class="tl-node"></div>
+          <div class="tl-card">
+            <div class="tl-when">Stage 2 · Months 6–12 · Logistics Density</div>
+            <h3 class="text-xl font-bold font-brand text-white">Fleet Interleaving &amp; Order Batching</h3>
+            <p class="text-sm text-white/80 mt-2 leading-relaxed">
+              Dynamically cross-route riders during afternoon low-order periods between morning grocery peaks on Instamart and evening quick-bites on Bolt. Cluster orders in university campuses and IT corridors to achieve 1.8x batching efficiency.
+            </p>
+            <div class="tl-bench mt-3 text-xs bg-black/20 p-2.5 rounded-lg border border-white/20">
+              📊 Gate Threshold: Achieve <b>&gt;1.8 orders/drop</b> and drop cost below ₹22.
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage 3 -->
+        <div class="tl-item reveal">
+          <div class="tl-node"></div>
+          <div class="tl-card">
+            <div class="tl-when">Stage 3 · Months 12–18 · Monetization &amp; Defense</div>
+            <h3 class="text-xl font-bold font-brand text-white">Merchant Ads &amp; Bengaluru Fortification</h3>
+            <p class="text-sm text-white/80 mt-2 leading-relaxed">
+              Roll out sponsored merchant ad auctions to generate high-margin platform income. Lock in long-term exclusivity with top budget eateries in Bengaluru to block Rapido Ownly from expanding beyond its 10% market share.
+            </p>
+            <div class="tl-bench mt-3 text-xs bg-black/20 p-2.5 rounded-lg border border-white/20">
+              📊 Gate Threshold: City cohort unit contribution margin &gt;0% across 80% of live markets.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     10. THE PRIZE, THE MOAT & SIGNATURE FOOTER (White Panel)
+     ========================================================= -->
+<section class="panel white" id="close">
+  <div class="slab" data-dir="right">
+    <div class="wrap">
+      <div class="s-kicker reveal">
+        <span class="idx">09</span>
+        <span class="nm">Strategic Moat · The Ultimate Prize</span>
+        <span class="ln"></span>
+      </div>
+
+      <div class="reveal"><span class="eyebrow">Strategic Value · The Endgame</span></div>
+      <h2 class="head reveal">Three prizes, <span class="hl">one standalone app.</span></h2>
+      <p class="lede reveal">
+        Toing is not just a defensive barrier against Rapido Ownly; it is an aggressive top-of-funnel customer acquisition weapon for the entire Swiggy ecosystem.
+      </p>
+
+      <div class="prize-grid mt-8">
+        <div class="prize reveal stg">
+          <div class="ptop flex items-center justify-between">
+            <span class="pn font-bold text-sm bg-orange-500 text-white w-8 h-8 rounded-lg flex items-center justify-center">01</span>
+            <span class="ico text-2xl">📈</span>
+          </div>
+          <h4 class="text-lg font-bold font-brand text-gray-900 mt-3">Daily Habitual Frequency</h4>
+          <div class="pstat text-sm font-bold text-orange-600 mt-1">2x/mo → 15x/mo</div>
+          <p class="text-xs text-gray-600 mt-2 leading-relaxed">
+            By keeping checkouts under ₹125, Toing transforms food delivery from an expensive weekend treat into a daily lunch and dinner routine for millions of working professionals.
+          </p>
+          <div class="lever mt-3 text-[10px] font-bold uppercase tracking-wider bg-orange-100 text-orange-700 px-2.5 py-1 rounded-full inline-block">The Habit Lever</div>
+        </div>
+
+        <div class="prize reveal stg" data-delay="1">
+          <div class="ptop flex items-center justify-between">
+            <span class="pn font-bold text-sm bg-orange-500 text-white w-8 h-8 rounded-lg flex items-center justify-center">02</span>
+            <span class="ico text-2xl">🌱</span>
+          </div>
+          <h4 class="text-lg font-bold font-brand text-gray-900 mt-3">Greenfield Market Expansion</h4>
+          <div class="pstat text-sm font-bold text-orange-600 mt-1">66% First-Timers</div>
+          <p class="text-xs text-gray-600 mt-2 leading-relaxed">
+            Two-thirds of Toing users have never transacted on online food platforms before. Toing acts as a massive zero-CAC acquisition funnel that Swiggy can later cross-sell into Instamart.
+          </p>
+          <div class="lever mt-3 text-[10px] font-bold uppercase tracking-wider bg-orange-100 text-orange-700 px-2.5 py-1 rounded-full inline-block">The Acquisition Lever</div>
+        </div>
+
+        <div class="prize reveal stg" data-delay="2">
+          <div class="ptop flex items-center justify-between">
+            <span class="pn font-bold text-sm bg-orange-500 text-white w-8 h-8 rounded-lg flex items-center justify-center">03</span>
+            <span class="ico text-2xl">🛡️</span>
+          </div>
+          <h4 class="text-lg font-bold font-brand text-gray-900 mt-3">Defensive Flank Protection</h4>
+          <div class="pstat text-sm font-bold text-orange-600 mt-1">Contain Rapido Ownly</div>
+          <p class="text-xs text-gray-600 mt-2 leading-relaxed">
+            Neutralizes Rapido Ownly's zero-commission appeal before it spreads outside Bengaluru, preserving the high-margin ₹9,490 Cr food delivery fortress.
+          </p>
+          <div class="lever mt-3 text-[10px] font-bold uppercase tracking-wider bg-orange-100 text-orange-700 px-2.5 py-1 rounded-full inline-block">The Defense Lever</div>
+        </div>
+      </div>
+
+      <!-- The Moat Banner -->
+      <div class="moat reveal mt-8 p-8 rounded-2xl bg-gradient-to-r from-orange-600 via-orange-500 to-amber-600 text-white shadow-xl relative overflow-hidden flex gap-6 items-start">
+        <div class="moat-badge font-bold text-xs uppercase tracking-wider bg-white/20 px-3 py-1.5 rounded-full shrink-0">🔒 The Moat</div>
+        <div class="moat-body relative z-10">
+          <h3 class="text-2xl font-bold font-brand">Shared Infrastructure Density</h3>
+          <p class="text-sm text-white/90 mt-2 leading-relaxed max-w-4xl">
+            A startup cannot easily duplicate a 400,000+ rider mesh and 1,171 Instamart dark stores. By interleaving riders between morning groceries, noon budget lunches, and evening quick-bites, Swiggy drives down fixed cost per hour lower than any standalone food rival can match.
+          </p>
+        </div>
+      </div>
+
+      <!-- Signoff -->
+      <div class="signoff reveal mt-12 p-8 rounded-2xl text-center bg-orange-50 border border-orange-200">
+        <p class="q text-2xl font-bold font-brand text-gray-900 max-w-3xl mx-auto leading-snug">
+          "Affordability is the single largest unlock for the category in India. Swiggy's challenge is not proving demand for a ₹99 meal—it is mastering the logistics math that lets it survive."
+        </p>
+        <div class="by text-xs text-gray-500 font-semibold mt-3">
+          A Product Strategy &amp; Economic Case Study on Toing by Swiggy · October 2026
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         SIGNATURE FOOTER (Interactive Flashlight Wordmark)
+         ========================================================= -->
+    <footer id="site-footer" aria-label="Swiggy Case Study Signature Footer">
+      <div class="ft-top max-w-6xl mx-auto px-6 flex flex-wrap justify-between gap-8 text-white/80">
+        <div class="ft-intro max-w-md">
+          <span class="text-xs uppercase font-mono font-bold tracking-widest text-orange-400">Swiggy Platform Innovations · Case Study</span>
+          <p class="text-sm text-white/60 mt-2 leading-relaxed">
+            Prepared 4 October 2026 using public shareholder communication, exchange disclosures, and financial reports up to Swiggy's Q1 FY27 results (quarter ended 30 June 2026).
+          </p>
+          <div class="mt-4">
+            <a href="#hero" class="inline-flex items-center gap-2 text-xs font-bold text-orange-400 hover:text-white transition-colors">
+              <span>Back to Top</span> ↑
+            </a>
+          </div>
+        </div>
+
+        <div class="flex gap-12 text-xs">
+          <div class="space-y-2">
+            <div class="font-bold text-white uppercase tracking-wider font-mono">Case Sections</div>
+            <div><a href="#problem" class="hover:text-orange-400 transition-colors">The Fee Fatigue</a></div>
+            <div><a href="#market" class="hover:text-orange-400 transition-colors">Competitive Teardown</a></div>
+            <div><a href="#diagnosis" class="hover:text-orange-400 transition-colors">Funnel Diagnosis</a></div>
+            <div><a href="#business" class="hover:text-orange-400 transition-colors">Rupee Simulator</a></div>
+          </div>
+          <div class="space-y-2">
+            <div class="font-bold text-white uppercase tracking-wider font-mono">Primary Sources</div>
+            <div><a href="https://yourstory.com" target="_blank" class="hover:text-orange-400 transition-colors">YourStory Q1 FY27</a></div>
+            <div><a href="https://reuters.com" target="_blank" class="hover:text-orange-400 transition-colors">Reuters Breakingviews</a></div>
+            <div><a href="https://inc42.com" target="_blank" class="hover:text-orange-400 transition-colors">Inc42 Market Report</a></div>
+            <div><a href="https://medianama.com" target="_blank" class="hover:text-orange-400 transition-colors">MediaNama Toing Architecture</a></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-full max-w-6xl mx-auto h-[1px] bg-white/10 my-8"></div>
+
+      <div class="text-center">
+        <span class="ft-pill inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/15 bg-white/[0.04] text-[11px] uppercase font-mono tracking-widest text-white/70 backdrop-blur-sm">
+          <span class="w-1.5 h-1.5 rounded-full bg-orange-500 shadow-[0_0_8px_#FC8019]"></span>
+          A Case Study By
+        </span>
+      </div>
+
+      <!-- Interactive Flashlight Spotlight Wordmark -->
+      <div class="ft-wordmark mt-4">
+        <span class="ft-word ft-word-base">VEDANT SALUNKHE</span>
+        <span class="ft-word ft-word-glow" aria-hidden="true">VEDANT SALUNKHE</span>
+      </div>
+
+      <div class="text-center text-[10px] uppercase font-mono tracking-widest text-white/40 pb-6 pt-2">
+        Product Teardown &amp; Design · 2026
+      </div>
+    </footer>
+  </div>
+</section>
+
+</div><!-- /panels -->
+
+<!-- Application Script -->
+<script src="app.js"></script>
 </body>
 </html>
