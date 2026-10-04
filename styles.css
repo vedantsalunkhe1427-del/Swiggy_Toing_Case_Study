@@ -1,0 +1,202 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+:root {
+  --swiggy-orange: #FC8019;
+  --swiggy-orange-dark: #E66700;
+  --swiggy-orange-light: #FFF2E8;
+  --swiggy-orange-glow: rgba(252, 128, 25, 0.25);
+  --swiggy-black: #02060C;
+  --swiggy-charcoal: #1E1E24;
+  --swiggy-card-bg: #FFFFFF;
+  --swiggy-body-bg: #F8F9FA;
+  --swiggy-text-main: #1C1D24;
+  --swiggy-text-muted: #686B78;
+  --swiggy-border: #E8ECEF;
+  --swiggy-green: #60B244;
+  --swiggy-green-light: #EBF8EC;
+  --swiggy-red: #E23744;
+  --swiggy-red-light: #FDE8E9;
+  --receipt-bg: #FCFBF7;
+  --receipt-border: #E0DDD5;
+}
+
+.dark {
+  --swiggy-black: #05070B;
+  --swiggy-charcoal: #12151D;
+  --swiggy-card-bg: #141824;
+  --swiggy-body-bg: #0A0D14;
+  --swiggy-text-main: #F1F3F7;
+  --swiggy-text-muted: #94A3B8;
+  --swiggy-border: #232A3B;
+  --swiggy-orange-light: rgba(252, 128, 25, 0.12);
+  --swiggy-green-light: rgba(96, 178, 68, 0.15);
+  --swiggy-red-light: rgba(226, 55, 68, 0.15);
+  --receipt-bg: #1A1F2E;
+  --receipt-border: #2E374D;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--swiggy-body-bg);
+  color: var(--swiggy-text-main);
+  scroll-behavior: smooth;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3, h4, .brand-font {
+  font-family: 'Outfit', sans-serif;
+}
+
+.mono-font {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--swiggy-body-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--swiggy-orange);
+}
+
+/* Receipt Styling */
+.receipt-card {
+  background-color: var(--receipt-bg);
+  border: 1px dashed var(--receipt-border);
+  position: relative;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+.receipt-zigzag-bottom {
+  position: relative;
+}
+.receipt-zigzag-bottom::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: radial-gradient(circle, transparent, transparent 50%, var(--receipt-bg) 50%, var(--receipt-bg) 100%);
+  background-size: 16px 16px;
+}
+
+/* Scooter progress track */
+#scooter-indicator {
+  transition: left 0.1s linear;
+}
+
+/* Subtle glow effects */
+.orange-glow {
+  box-shadow: 0 8px 30px rgba(252, 128, 25, 0.18);
+}
+
+.orange-glow-sm {
+  box-shadow: 0 4px 14px rgba(252, 128, 25, 0.22);
+}
+
+/* Interactive Card Hover */
+.interactive-card {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.interactive-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.08);
+}
+.dark .interactive-card:hover {
+  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.4);
+}
+
+/* Tag Badge */
+.swiggy-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Custom Slider Styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 9999px;
+  background: #E2E8F0;
+  outline: none;
+  transition: background 0.2s;
+}
+.dark input[type="range"] {
+  background: #334155;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--swiggy-orange);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(252, 128, 25, 0.5);
+  border: 2px solid #FFFFFF;
+  transition: transform 0.15s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.18);
+}
+
+/* Active Nav Indicator */
+.nav-link.active {
+  color: var(--swiggy-orange);
+  background: var(--swiggy-orange-light);
+  font-weight: 600;
+}
+.dark .nav-link.active {
+  background: rgba(252, 128, 25, 0.15);
+}
+
+/* Glassmorphism */
+.glass-header {
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  background: rgba(255, 255, 255, 0.88);
+}
+.dark .glass-header {
+  background: rgba(10, 13, 20, 0.88);
+}
+
+/* Custom modal backdrop */
+.modal-backdrop {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Print Styling */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+  }
+  .receipt-card {
+    border: 1px solid #CCC !important;
+    background: #FFF !important;
+  }
+}

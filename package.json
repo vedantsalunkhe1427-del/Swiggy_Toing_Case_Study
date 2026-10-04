@@ -1,0 +1,12 @@
+{
+  "name": "swiggy-toing-case-study",
+  "version": "1.0.0",
+  "description": "Smooth UI/UX Swiggy-themed Case Study Website on Toing & Low-Cost Food Delivery Economics",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "serve": "node server.js"
+  },
+  "author": "Swiggy Research & Platform Strategy",
+  "license": "MIT"
+}
