@@ -1,24 +1,76 @@
-# 🛵 Toing by Swiggy: Case Study Web Application
+#  Toing by Swiggy — Case Study
 
-A smooth, interactive, Swiggy-themed Case Study Website analyzing **Toing**, Swiggy's budget food delivery venture, unit economics, market dynamics, and strategic trade-offs.
+An interactive case study on **Toing**, Swiggy's budget food delivery offering. The project looks at its unit economics, pricing, competition, customer segments, and the strategic trade-offs involved in building a low-cost food delivery model.
 
-## 🚀 How to View the Website
+##  Live Website
 
-The website is hosted on **Vercel** and is available directly through the live deployment.
+The project is deployed on Vercel:
 
-### 🌐 Live Website
+**[View Live Website](https://swiggy-toing-case-study.vercel.app/)**
 
-Visit the deployed website here:
-
-👉 **[View the Live Website](https://swiggy-toing-case-study.vercel.app)**
-
-No installation or local server is required. Simply open the link in any modern browser.
+No setup is required. Open the link in any modern browser.
 
 ---
 
-## ✨ Features & Polish
+## Features
 
-- **Swiggy Visual Language**: Signature Swiggy orange (`#FC8019`), dark charcoal obsidian, clean rounded cards, warm shadows, and typography (`Outfit`, `Plus Jakarta Sans`, `JetBrains Mono`).
-- **Delivery Scooter Progress Tracker**: Animated scooter that rides along the reading progress bar across the screen as you scroll.
-- **The Pune Bill Contrast**: Authentic receipt slips highlighting the ₹124 vs ₹193 contrast for the same ₹99 meal.
-- **Interactive Basket & Order Economics Simulator**: Dynamic sliders for base meal pricing, rain surcharge toggle, and packaging fees, with live calculation of platform contribution and consumer savings.
+### UI & Interaction
+
+- Swiggy-inspired visual design using orange, dark charcoal, rounded cards, and custom typography.
+- Scroll-based delivery scooter progress indicator.
+- Light and dark themes with the selected theme saved using `localStorage`.
+- Responsive layout for different screen sizes.
+- Print-friendly styling for exporting the case study as a PDF.
+- `Ctrl + K` quick search for navigating through the case study.
+
+### Case Study & Analysis
+
+- Pune bill comparison showing the difference between a ₹124 and ₹193 final bill for the same ₹99 meal.
+- Interactive basket simulator for experimenting with meal price, rain surcharge, and packaging fees.
+- Unit economics breakdown for a ₹99 Toing order compared with a ₹700 core Swiggy order.
+- SWOT analysis and cannibalization simulator.
+- Competitive comparison covering Toing, Rapido Ownly, Eternal Bistro, and Flipkart ONDC.
+- Analysis of Swiggy's investment in Rapido and the resulting strategic implications.
+- Six strategic recommendations based on the analysis.
+
+### Charts & Visualizations
+
+Built using Chart.js:
+
+- Revenue vs net loss comparison (Q1 FY26 vs Q1 FY27).
+- Business segment GOV distribution.
+- Unit economics breakdown.
+- Instamart contribution margin trajectory towards break-even.
+
+### Discussion & Polls
+
+- Five discussion questions related to the case.
+- Interactive voting with calculated percentages.
+- Takeaways based on the poll results.
+- Completion animation and confetti effect.
+
+### Other Details
+
+- Web Audio API used for small UI sound effects.
+- No external audio files are required.
+- Animations and interactions are implemented using JavaScript and CSS.
+
+---
+
+## 🛠️ Technologies Used
+
+- HTML5
+- CSS3
+- JavaScript
+- Chart.js
+- Web Audio API
+- LocalStorage
+- Vercel
+
+---
+
+## ☁️ Deployment
+
+The website is deployed on **Vercel** and connected to the GitHub repository.
+
+```text
